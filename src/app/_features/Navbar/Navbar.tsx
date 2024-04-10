@@ -4,7 +4,6 @@ import { useAuth } from "@clerk/nextjs";
 import { Dialog, DialogClose } from "@radix-ui/react-dialog";
 import { LogIn, Menu, Rocket } from "lucide-react";
 import Link from "next/link";
-import * as React from "react";
 import { Button, buttonVariants } from "~/components/ui/button";
 import {
   NavigationMenu,
@@ -24,9 +23,16 @@ import { cn } from "~/lib/utils";
 import { ModeToggle } from "./ModeToggler";
 import { Profile } from "./Profile";
 
-export function NavBar() {
-  const { userId } = useAuth();
+const BRAND_NAME = "סטנדאוט";
+const DRAWER_DESCRIPTION = "Plan, Build & Scale.";
 
+const links: Array<{ label: string; href: string }> = [
+  { label: "מאגר שאלות", href: "/questions-db" },
+  { label: "קבע ראיון", href: "/interview" },
+  { label: "בלוג", href: "/blog" },
+] as const;
+
+export function NavBar() {
   return (
     <div className="z-10 flex min-w-full justify-between border-b p-2">
       <NavigationMenu className="flex flex-1 items-center justify-between px-4">
@@ -34,122 +40,82 @@ export function NavBar() {
           href="/"
           className="text-md flex cursor-pointer items-center justify-center gap-2 pl-2 font-bold"
         >
-          <Rocket /> Stand out
+          <Rocket />
+          {BRAND_NAME}
         </Link>
         <NavigationMenuList className="max-[825px]:hidden ">
-          <NavigationMenuItem>
-            <Link
-              href="/contact-us"
-              legacyBehavior
-              passHref
-              className="cursor-pointer"
-            >
-              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                About
-              </NavigationMenuLink>
-            </Link>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <Link
-              href="/contact-us"
-              legacyBehavior
-              passHref
-              className="cursor-pointer"
-            >
-              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                Contact
-              </NavigationMenuLink>
-            </Link>
-          </NavigationMenuItem>
+          {links.map(({ label, href }) => (
+            <HeaderLink href={href} label={label} key={href} />
+          ))}
         </NavigationMenuList>
-        <div className="flex items-center gap-3">
-          <ModeToggle />
-          {userId ? (
-            <Profile />
-          ) : (
-            <Link
-              className={buttonVariants({ size: "icon", variant: "outline" })}
-              href="/sign-in"
-            >
-              <LogIn />
-            </Link>
-          )}
-          <Dialog>
-            <SheetTrigger className="transition min-[825px]:hidden">
-              <Button asChild variant="outline" size="icon">
-                <Menu />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left">
-              <SheetHeader>
-                <SheetTitle>Stand out</SheetTitle>
-                <SheetDescription>Plan, Build & Scale.</SheetDescription>
-              </SheetHeader>
-              <div className="mt-[1rem] flex flex-col space-y-3">
-                <DialogClose asChild>
-                  <Link
-                    className={cn(
-                      buttonVariants({ size: "icon", variant: "outline" }),
-                      "w-full",
-                    )}
-                    href="/"
-                  >
-                    Home
-                  </Link>
-                </DialogClose>
-                <DialogClose asChild>
-                  <Link
-                    className={cn(
-                      buttonVariants({ size: "icon", variant: "outline" }),
-                      "w-full",
-                    )}
-                    href="/contact-us"
-                  >
-                    Contact
-                  </Link>
-                </DialogClose>
-                <DialogClose asChild>
-                  <Link
-                    className={cn(
-                      buttonVariants({ size: "icon", variant: "outline" }),
-                      "w-full",
-                    )}
-                    href="/about"
-                  >
-                    About
-                  </Link>
-                </DialogClose>
-              </div>
-            </SheetContent>
-          </Dialog>
-        </div>
+        <ControlPanelWithDrawer />
       </NavigationMenu>
     </div>
   );
 }
 
-const ListItem = React.forwardRef<
-  React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
-  return (
-    <li>
-      <NavigationMenuLink asChild>
-        <a
-          ref={ref}
-          className={cn(
-            "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors",
-            className,
-          )}
-          {...props}
-        >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="text-muted-foreground line-clamp-2 text-sm leading-snug">
-            {children}
-          </p>
-        </a>
-      </NavigationMenuLink>
-    </li>
+const DrawerLinks = ({ href, label }: { href: string; label: string }) => (
+  <DialogClose asChild>
+    <Link
+      className={cn(
+        buttonVariants({ size: "icon", variant: "outline" }),
+        "w-full",
+      )}
+      href={href}
+    >
+      {label}
+    </Link>
+  </DialogClose>
+);
+
+const AuthButton = () => {
+  const { userId } = useAuth();
+  return userId ? (
+    <Profile />
+  ) : (
+    <Link
+      className={buttonVariants({ size: "icon", variant: "outline" })}
+      href="/sign-in"
+    >
+      <LogIn />
+    </Link>
   );
-});
-ListItem.displayName = "ListItem";
+};
+
+const ControlPanelWithDrawer = () => {
+  return (
+    <div className="flex items-center gap-3">
+      <ModeToggle />
+      <AuthButton />
+      <Dialog>
+        <SheetTrigger className="transition min-[825px]:hidden">
+          <Button asChild variant="outline" size="icon">
+            <Menu />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="right">
+          <SheetHeader>
+            <SheetTitle>{BRAND_NAME}</SheetTitle>
+            <SheetDescription>{DRAWER_DESCRIPTION}</SheetDescription>
+          </SheetHeader>
+          <div className="mt-[1rem] flex flex-col space-y-3">
+            <DrawerLinks href="/" label="בית" />
+            {links.map(({ label, href }) => (
+              <DrawerLinks href={href} label={label} key={href} />
+            ))}
+          </div>
+        </SheetContent>
+      </Dialog>
+    </div>
+  );
+};
+
+const HeaderLink = ({ label, href }: { label: string; href: string }) => (
+  <NavigationMenuItem>
+    <Link href={href} legacyBehavior passHref className="cursor-pointer">
+      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+        {label}
+      </NavigationMenuLink>
+    </Link>
+  </NavigationMenuItem>
+);
