@@ -20,7 +20,6 @@ import {
   SheetTrigger,
 } from "~/components/ui/sheet";
 import { cn } from "~/lib/utils";
-import { ModeToggle } from "./ModeToggler";
 import { Profile } from "./Profile";
 
 const BRAND_NAME = "סטנדאוט";
@@ -85,12 +84,11 @@ const AuthButton = () => {
 const ControlPanelWithDrawer = () => {
   return (
     <div className="flex items-center gap-3">
-      <ModeToggle />
       <AuthButton />
       <Dialog>
         <SheetTrigger className="transition min-[825px]:hidden">
-          <Button asChild variant="outline" size="icon">
-            <Menu />
+          <Button asChild variant="outline" size="icon" className="p-[7px]">
+            <Menu size="24px" />
           </Button>
         </SheetTrigger>
         <SheetContent side="right">
