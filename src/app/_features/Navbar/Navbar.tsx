@@ -53,7 +53,7 @@ export function NavBar() {
   );
 }
 
-const DrawerLinks = ({ href, label }: { href: string; label: string }) => (
+const DrawerLink = ({ href, label }: { href: string; label: string }) => (
   <DialogClose asChild>
     <Link
       className={cn(
@@ -97,9 +97,9 @@ const ControlPanelWithDrawer = () => {
             <SheetDescription>{DRAWER_DESCRIPTION}</SheetDescription>
           </SheetHeader>
           <div className="mt-[1rem] flex flex-col space-y-3">
-            <DrawerLinks href="/" label="בית" />
+            <DrawerLink href="/" label="בית" />
             {links.map(({ label, href }) => (
-              <DrawerLinks href={href} label={label} key={href} />
+              <DrawerLink href={href} label={label} key={href} />
             ))}
           </div>
         </SheetContent>
@@ -110,7 +110,7 @@ const ControlPanelWithDrawer = () => {
 
 const HeaderLink = ({ label, href }: { label: string; href: string }) => (
   <NavigationMenuItem>
-    <Link href={href} legacyBehavior passHref className="cursor-pointer">
+    <Link href={href} passHref className="cursor-pointer">
       <NavigationMenuLink className={navigationMenuTriggerStyle()}>
         {label}
       </NavigationMenuLink>
