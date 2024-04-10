@@ -6,7 +6,7 @@ export default async function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center text-2xl text-black">
       <div className="flex min-h-full flex-col items-center justify-center">
-        מקום טוב להתחיל בו 💪
+        מקום טוב להתחיל בו 🚀
         <div className="flex flex-col items-center gap-2">
           <p>{hello ? hello.greeting : "Loading tRPC query..."}</p>
         </div>
