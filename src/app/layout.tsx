@@ -1,5 +1,4 @@
 import { ClerkProvider } from "@clerk/nextjs";
-import { ThemeProvider } from "~/app/_components/ThemeProvider";
 import "~/styles/globals.css";
 
 import { Inter } from "next/font/google";
@@ -33,15 +32,8 @@ export default function RootLayout({
       <body className={`font-sans ${inter.variable}`}>
         <ClerkProvider>
           <TRPCReactProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <NavBar />
-              <main>{children}</main>
-            </ThemeProvider>
+            <NavBar />
+            {children}
           </TRPCReactProvider>
         </ClerkProvider>
       </body>
