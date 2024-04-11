@@ -36,7 +36,6 @@ export function NavBar() {
     <div className="z-10 flex min-w-full justify-between border-b p-2">
       <NavigationMenu className="flex flex-1 items-center justify-between px-4">
         <Link
-          replace
           href="/"
           className="text-md flex cursor-pointer items-center justify-center gap-2 pl-2 font-bold"
         >
@@ -57,7 +56,6 @@ export function NavBar() {
 const DrawerLink = ({ href, label }: { href: string; label: string }) => (
   <DialogClose asChild>
     <Link
-      replace
       className={cn(
         buttonVariants({ size: "icon", variant: "outline" }),
         "w-full",
