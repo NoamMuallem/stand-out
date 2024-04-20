@@ -8,9 +8,7 @@ import { Button, buttonVariants } from "~/components/ui/button";
 import {
   NavigationMenu,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
-  navigationMenuTriggerStyle,
 } from "~/components/ui/navigation-menu";
 import {
   SheetContent,
@@ -110,10 +108,12 @@ const ControlPanelWithDrawer = () => {
 
 const HeaderLink = ({ label, href }: { label: string; href: string }) => (
   <NavigationMenuItem>
-    <Link href={href} passHref className="cursor-pointer">
-      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-        {label}
-      </NavigationMenuLink>
+    <Link
+      className={cn(buttonVariants({ variant: "ghost" }))}
+      href={href}
+      passHref
+    >
+      {label}
     </Link>
   </NavigationMenuItem>
 );
