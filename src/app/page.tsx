@@ -8,18 +8,15 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 import { Card } from "~/components/ui/card";
-// import { api } from "~/trpc/server";
 
 export default async function Home() {
-  //   const hello = await api.post.hello({ text: "from tRPC" });
-
   return (
     <main className="flex min-h-screen flex-col items-center justify-start text-2xl text-black">
       <div className="relative min-h-[calc(100dvh-57px)] w-full">
         <BackgroundBeams>
-          <h1 className="px-4 text-7xl text-slate-900">
+          <h1 className="m-auto px-4 text-center text-7xl text-slate-900">
             {`הדרך הטובה ביותר להגיע `}
-            <Highlight>מוכן לראיון</Highlight>
+            <Highlight className="whitespace-nowrap">מוכן לראיון</Highlight>
           </h1>
         </BackgroundBeams>
       </div>
@@ -68,12 +65,6 @@ export default async function Home() {
               <ProfileForm />
             </section>
           </Card>
-          {/* <div className="flex min-h-full flex-col items-center justify-center">
-        מקום טוב להתחיל בו 🚀
-        <div className="flex flex-col items-center gap-2">
-          <p>{hello ? hello.greeting : "Loading tRPC query..."}</p>
-        </div>
-      </div> */}
         </TracingBeam>
       </div>
     </main>

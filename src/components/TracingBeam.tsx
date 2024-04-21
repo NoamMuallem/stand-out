@@ -2,14 +2,30 @@
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import { cn } from "~/app/_utils/cn";
+import { useBreakpoint } from "~/app/hooks/tailwind";
+
+type TracingBeamWrapperProps = {
+  children: React.ReactNode;
+  className?: string;
+};
 
 export const TracingBeam = ({
   children,
   className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => {
+}: TracingBeamWrapperProps) => {
+  const shouldDisplayTracingBeam = useBreakpoint("lg");
+
+  if (shouldDisplayTracingBeam) {
+    return <TracingBeamCore className={className}>{children}</TracingBeamCore>;
+  }
+
+  return <div className={className}>{children}</div>;
+};
+
+export const TracingBeamCore = ({
+  children,
+  className,
+}: TracingBeamWrapperProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -56,7 +72,7 @@ export const TracingBeam = ({
                 ? "none"
                 : "rgba(0, 0, 0, 0.24) 0px 3px 8px",
           }}
-          className="border-netural-200 ml-[27px] flex h-4 w-4 items-center justify-center rounded-full border shadow-sm"
+          className="border-netural-200 absolute left-[0.25px] ml-[27px] flex h-4 w-4 items-center justify-center rounded-full border shadow-sm"
         >
           <motion.div
             transition={{
