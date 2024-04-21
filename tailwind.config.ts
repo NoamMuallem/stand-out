@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import svgToDataUri from "mini-svg-data-uri";
 import type { Config } from "tailwindcss";
 import { default as flattenColorPalette } from "tailwindcss/lib/util/flattenColorPalette";
