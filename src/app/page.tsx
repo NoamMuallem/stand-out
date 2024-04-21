@@ -21,7 +21,7 @@ export default async function Home() {
         </BackgroundBeams>
       </div>
       <div className="relative w-full px-4">
-        <TracingBeam className="py-4">
+        <TracingBeam>
           <Card className="mb-4 p-4">
             <h2 className="px-4 text-5xl font-bold text-slate-900">
               איך זה עובד?
