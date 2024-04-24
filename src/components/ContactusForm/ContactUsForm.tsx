@@ -50,8 +50,11 @@ export function ProfileForm() {
     try {
       setServerError(null);
       await addLeadToNotion(values);
+      form.reset();
     } catch (error) {
-      setServerError(getErrorMessage(error));
+      const errorMessage = getErrorMessage(error);
+      console.error(errorMessage);
+      setServerError(errorMessage);
     }
   }
 
