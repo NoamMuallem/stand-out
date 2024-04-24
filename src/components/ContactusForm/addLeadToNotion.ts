@@ -1,7 +1,9 @@
 "use server";
 import { Client } from "@notionhq/client";
+import { headers } from "next/headers";
 import { type z } from "zod";
 import { env } from "~/env";
+import { ratelimit } from "~/lib/rateLimiter";
 import { type formSchema } from "./ContactUsForm";
 
 export const addLeadToNotion = async ({
@@ -15,6 +17,12 @@ export const addLeadToNotion = async ({
   const notionCRMTableID = env.NOTION_CRM_DB_ID;
   if (!notionCRMTableID)
     throw new Error("שמירת הנתונים נכשלה. נא לנסות שוב מאוחר יותר.");
+
+  if (process.env.NODE_ENV === "production") {
+    const ip = headers().get("x-forwarded-for") ?? "127.0.0.1";
+    const { success } = await ratelimit.limit(ip);
+    if (!success) throw new Error("יותר מידי בקשות. נסה שוב מאוחר יותר.");
+  }
 
   await notion.pages.create({
     parent: {
