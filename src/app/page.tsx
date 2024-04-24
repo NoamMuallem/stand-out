@@ -1,4 +1,4 @@
-import { ProfileForm } from "~/components/ContactUsForm";
+import { ProfileForm } from "~/components/ContactusForm/ContactUsForm";
 import { BackgroundBeams, Highlight } from "~/components/Hero";
 import { TracingBeam } from "~/components/TracingBeam";
 import {

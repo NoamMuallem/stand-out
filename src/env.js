@@ -9,6 +9,8 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url(),
     CLERK_SECRET_KEY: z.string(),
+    NOTION_INTEGRATION_SECRET: z.string(),
+    NOTION_CRM_DB_ID: z.string(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -34,6 +36,8 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
     NODE_ENV: process.env.NODE_ENV,
+    NOTION_INTEGRATION_SECRET: process.env.NOTION_INTEGRATION_SECRET,
+    NOTION_CRM_DB_ID: process.env.NOTION_CRM_DB_ID,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
