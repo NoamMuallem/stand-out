@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: stand-out
+  annotations:
+    github.com/project-slug: NoamMuallem/stand-out
+spec:
+  type: other
+  lifecycle: unknown
+  owner: Noam
