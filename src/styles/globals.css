@@ -44,3 +44,47 @@
     @apply bg-background text-foreground;
   }
 }
+
+.notion-heading_1 {
+  @apply text-4xl font-bold;
+}
+
+.notion-heading_2 {
+  @apply text-3xl font-bold;
+}
+
+.notion-heading_3 {
+  @apply text-2xl font-bold;
+}
+
+.notion-heading_4 {
+  @apply text-xl font-bold;
+}
+
+.notion-heading_5 {
+  @apply text-lg font-bold;
+}
+
+.notion-heading_6 {
+  @apply text-base font-bold;
+}
+
+.notion-bulleted_list {
+  @apply list-disc pr-4;
+}
+
+summary {
+  @apply cursor-pointer;
+}
+
+.notion-code {
+  @apply rounded-md bg-gray-100 p-2;
+}
+
+.notion-text-href {
+  @apply text-blue-500 underline visited:text-violet-600 hover:text-blue-600 visited:hover:text-violet-600;
+}
+
+.notion-quote {
+  @apply border-r-4 border-accent-foreground pr-4;
+}

@@ -1,6 +1,6 @@
 "use server";
-import { Client } from "@notionhq/client";
 import { type z } from "zod";
+import { notionClient } from "~/app/_utils/notion";
 import { env } from "~/env";
 import { type formSchema } from "./ContactUsForm";
 
@@ -9,14 +9,11 @@ export const addLeadToNotion = async ({
   email,
   text,
 }: z.infer<typeof formSchema>) => {
-  const notion = new Client({
-    auth: env.NOTION_INTEGRATION_SECRET,
-  });
   const notionCRMTableID = env.NOTION_CRM_DB_ID;
-  if (!notionCRMTableID)
+  if (!notionCRMTableID || !notionClient || !name || !email || !text)
     throw new Error("שמירת הנתונים נכשלה. נא לנסות שוב מאוחר יותר.");
 
-  await notion.pages.create({
+  await notionClient.pages.create({
     parent: {
       type: "database_id",
       database_id: notionCRMTableID,
