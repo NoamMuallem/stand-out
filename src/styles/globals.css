@@ -88,3 +88,104 @@ summary {
 .notion-quote {
   @apply border-r-4 border-accent-foreground pr-4;
 }
+
+.hljs-keyword {
+  @apply font-semibold text-purple-700 dark:text-purple-300;
+}
+
+.hljs-string {
+  @apply text-green-600 dark:text-green-300;
+}
+
+.hljs-title.function_,
+.hljs-title.class_ {
+  @apply font-semibold text-red-300 dark:text-red-300;
+}
+
+.hljs-attr {
+  @apply text-indigo-600 dark:text-indigo-400;
+}
+
+.hljs-comment {
+  @apply italic text-gray-500 dark:text-gray-400;
+}
+
+.language-javascript {
+  @apply text-foreground dark:text-primary-foreground;
+}
+.hljs-name {
+  @apply text-teal-200 dark:text-teal-200;
+}
+.notion-quote {
+  @apply mb-5 mt-5 italic text-gray-500 dark:text-gray-400;
+}
+.notion-text-href {
+  @apply text-primary underline;
+}
+.notion-heading_3 {
+  @apply mb-5;
+}
+.notion-code {
+  @apply mb-5 mt-5 overflow-auto rounded-md bg-gray-100 p-4 text-sm dark:bg-gray-900;
+}
+
+.notion-text-bold {
+  @apply font-bold;
+}
+
+.notion-text-code {
+  @apply inline-block rounded bg-gray-200 px-2 text-secondary dark:bg-gray-700 dark:text-secondary-foreground;
+}
+
+.notion-heading_1 {
+  @apply mb-4 mt-5 font-bold text-foreground dark:text-primary-foreground;
+}
+.notion-numbered_list {
+  @apply list-decimal pl-6 text-foreground dark:text-primary-foreground;
+}
+
+.notion-numbered_list_item {
+  @apply mb-2;
+}
+
+.notion-color-default {
+  @apply text-gray-800 dark:text-gray-300;
+}
+.notion-bulleted_list {
+  @apply list-disc pl-6;
+}
+
+.notion-bulleted_list_item {
+  @apply mb-2;
+}
+
+.notion-color-default {
+  @apply text-gray-800 dark:text-gray-300;
+}
+.notion-image {
+  @apply mb-5 mt-5;
+}
+.notion-color-yellow_background {
+  @apply bg-yellow-100 dark:bg-yellow-800;
+}
+.notion-color-red_background {
+  @apply bg-red-100 dark:bg-red-800;
+}
+.notion-color-blue_background {
+  @apply bg-blue-100 dark:bg-blue-800;
+}
+.notion-color-green_background {
+  @apply bg-green-100 dark:bg-green-800;
+}
+.notion-color-gray_background {
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+.notion-color_orange_background {
+  @apply bg-orange-100 dark:bg-orange-800;
+}
+.notion-color_purple_background {
+  @apply bg-purple-100 dark:bg-purple-800;
+}
+.notion-color-purple_background {
+  @apply bg-purple-100 dark:bg-purple-800;
+}
