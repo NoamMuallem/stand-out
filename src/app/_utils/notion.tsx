@@ -12,7 +12,7 @@ export const notionClient = new Client({
   auth: process.env.NOTION_INTEGRATION_SECRET,
 });
 
-export const getPages = cache(() => {
+export const getPages = cache(({ databaseID }: { databaseID: string }) => {
   return notionClient.databases.query({
     filter: {
       property: "Status",
@@ -20,7 +20,8 @@ export const getPages = cache(() => {
         equals: "Published",
       },
     },
-    database_id: process.env.NOTION_BLOG_POSTS_DB_ID!,
+    // database_id: process.env.NOTION_BLOG_POSTS_DB_ID!,
+    database_id: databaseID,
   });
 });
 

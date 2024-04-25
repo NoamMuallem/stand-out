@@ -3,10 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Card } from "~/components/ui/card";
+import { env } from "~/env";
 import { getPages } from "../_utils/notion";
 
 export default async function AllPOsts() {
-  const pages = await getPages().then((data) =>
+  const pages = await getPages({
+    databaseID: env.NOTION_BLOG_POSTS_DB_ID,
+  }).then((data) =>
     data.results
       //@ts-expect-error: Notion does not supply a full type coverage for it's tables
       .map(({ properties }) => {
