@@ -23,7 +23,9 @@ export default async function AllPOsts() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-screen-2xl flex-col items-center justify-start text-2xl text-black">
-      <h1 className="px-4 py-8 text-center text-7xl text-slate-900">בלוג</h1>
+      <h1 className="px-4 py-8 text-center text-7xl text-slate-900">
+        מאגר שאלות
+      </h1>
       <section className="columns-1 gap-x-4 space-y-4 p-4 sm:columns-2 md:columns-3">
         {pages.map((page) => (
           <Card
