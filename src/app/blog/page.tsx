@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import Image from "next/image";
 import Link from "next/link";
 import util from "util";
@@ -7,6 +9,7 @@ import { getPages } from "../_utils/notion";
 export default async function AllPOsts() {
   const pages = await getPages().then((data) =>
     data.results
+      //@ts-expect-error: Notion does not supply a full type coverage for it's tables
       .map(({ properties }) => {
         return {
           title: properties.Title.title[0].plain_text,
