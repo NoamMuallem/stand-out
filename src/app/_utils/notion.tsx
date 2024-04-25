@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import "server-only";
 
 import { Client } from "@notionhq/client";
@@ -15,7 +16,7 @@ export const getPages = cache(() => {
   return notionClient.databases.query({
     filter: {
       property: "Status",
-      select: {
+      status: {
         equals: "Published",
       },
     },
