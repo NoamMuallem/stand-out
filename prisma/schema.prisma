@@ -2,19 +2,61 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    @@index([name])
+  @@index([name])
+}
+
+model TimeSlot {
+  timeSlotID Int         @id @default(autoincrement())
+  startTime  DateTime
+  endTime    DateTime
+  isTaken    Boolean
+  user       UserProfile @relation(fields: [userID], references: [userID])
+  userID     String
+  meeting    Meeting?    @relation(fields: [meetingID], references: [meetingID])
+  meetingID  Int?
+}
+
+model UserProfile {
+  userID           String     @id
+  firstName        String
+  background       String
+  lookingToImprove String
+  timeSlots        TimeSlot[]
+  averageRanking   Float
+  amountOfRankings Int        @default(0)
+}
+
+model Meeting {
+  meetingID Int        @id @default(autoincrement())
+  user1ID   String
+  user2ID   String
+  startTime DateTime
+  endTime   DateTime
+  reviews   Review[]
+  timeSlots TimeSlot[]
+}
+
+model Review {
+  ranking      Int?
+  text         String?
+  isFiled      Boolean
+  meeting      Meeting @relation(fields: [meetingID], references: [meetingID])
+  meetingID    Int
+  userToReview String
+  reviewerID   String
+  reviewID     Int     @id @default(autoincrement())
 }

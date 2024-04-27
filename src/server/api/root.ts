@@ -1,5 +1,9 @@
-import { postRouter } from "~/server/api/routers/post";
+import "@total-typescript/ts-reset";
+import { meetingRouter } from "~/server/api/routers/meeting";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
+import { reviewRouter } from "./routers/review";
+import { timeSlotRouter } from "./routers/timeSlote";
+import { userProfile } from "./routers/userProfile";
 
 /**
  * This is the primary router for your server.
@@ -7,7 +11,10 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  post: postRouter,
+  meeting: meetingRouter,
+  review: reviewRouter,
+  userProfile: userProfile,
+  timeSlotRouter: timeSlotRouter,
 });
 
 // export type definition of API
