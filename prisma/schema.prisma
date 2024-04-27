@@ -20,18 +20,18 @@ model Post {
 }
 
 model TimeSlot {
-  timeSlotID Int         @id @default(autoincrement())
+  timeSlotID Int         @id @unique @default(autoincrement())
   startTime  DateTime
   endTime    DateTime
   isTaken    Boolean
   user       UserProfile @relation(fields: [userID], references: [userID])
   userID     String
-  meeting    Meeting?    @relation(fields: [meetingID], references: [meetingID])
+  meeting    Meeting?
   meetingID  Int?
 }
 
 model UserProfile {
-  userID           String     @id
+  userID           String     @id @unique
   firstName        String
   background       String
   lookingToImprove String
@@ -41,16 +41,18 @@ model UserProfile {
 }
 
 model Meeting {
-  meetingID Int        @id @default(autoincrement())
-  user1ID   String
-  user2ID   String
-  startTime DateTime
-  endTime   DateTime
-  reviews   Review[]
-  timeSlots TimeSlot[]
+  meetingID  Int      @id @unique @default(autoincrement())
+  user1ID    String
+  user2ID    String
+  startTime  DateTime
+  endTime    DateTime
+  reviews    Review[]
+  timeSlot   TimeSlot @relation(fields: [timeSlotID], references: [timeSlotID])
+  timeSlotID Int      @unique
 }
 
 model Review {
+  reviewID     Int     @id @unique @default(autoincrement())
   ranking      Int?
   text         String?
   isFiled      Boolean
@@ -58,5 +60,4 @@ model Review {
   meetingID    Int
   userToReview String
   reviewerID   String
-  reviewID     Int     @id @default(autoincrement())
 }
