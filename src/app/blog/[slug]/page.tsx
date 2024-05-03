@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import {
   getPageBySlug,
   getPageContent,
+  getPages,
   notionClient,
 } from "~/app/_utils/notion";
 
@@ -13,6 +14,26 @@ import {
 import bookmarkPlugin from "@notion-render/bookmark-plugin";
 import hljsPlugin from "@notion-render/hljs-plugin";
 import { Post } from "~/components/Post";
+import { env } from "~/env";
+
+export async function generateStaticParams() {
+  const posts = await getPages({
+    databaseID: env.NOTION_BLOG_POSTS_DB_ID,
+  }).then((data) =>
+    data.results
+      //@ts-expect-error: Notion does not supply a full type coverage for it's tables
+      .map(({ properties }) => {
+        return {
+          slug: properties.Slug.rich_text[0].plain_text,
+        };
+      })
+      .reverse(),
+  );
+
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
+}
 
 export default async function Page({ params }: { params: { slug: string } }) {
   const post = await getPageBySlug(params.slug);
