@@ -1,12 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Badge } from "~/components/ui/badge";
-import { Card } from "~/components/ui/card";
 import { env } from "~/env";
 import { getPages } from "../_utils/notion";
+import { QuestionsCards } from "./components/QuestionsCards";
 
-export default async function AllPOsts() {
-  const pages = await getPages({
+export type Question = {
+  question: string;
+  company?: string;
+  subject?: string;
+  id: string;
+};
+
+export default async function AllQuestions() {
+  const questions = await getPages({
     databaseID: env.NOTION_QUESTIONS_DB_ID,
   }).then((data) =>
     data.results
@@ -15,6 +21,7 @@ export default async function AllPOsts() {
         return {
           question: properties.Question.rich_text[0].text.content,
           company: properties.Company.select?.name,
+          subject: properties.Subject.select?.name,
           id,
         };
       })
@@ -26,21 +33,7 @@ export default async function AllPOsts() {
       <h1 className="px-4 py-8 text-center text-7xl text-slate-900">
         מאגר שאלות
       </h1>
-      <section className="columns-1 gap-x-4 space-y-4 p-4 sm:columns-2 md:columns-3">
-        {pages.map((page) => (
-          <Card
-            key={page.id}
-            className="flex break-inside-avoid flex-col items-center justify-start gap-2 p-4"
-          >
-            {page.company ? (
-              <Badge variant="outline" className="ml-auto">
-                {page.company}
-              </Badge>
-            ) : null}
-            <h2>{page.question}</h2>
-          </Card>
-        ))}
-      </section>
+      <QuestionsCards questions={questions} />
     </main>
   );
 }
