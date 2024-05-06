@@ -6,7 +6,7 @@ import { Card } from "~/components/ui/card";
 import { env } from "~/env";
 import { getPages } from "../_utils/notion";
 
-export default async function AllPOsts() {
+export default async function AllPosts() {
   const pages = await getPages({
     databaseID: env.NOTION_BLOG_POSTS_DB_ID,
   }).then((data) =>
