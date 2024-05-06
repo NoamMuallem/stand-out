@@ -9,6 +9,7 @@ export type Question = {
   company?: string;
   subject?: string;
   id: string;
+  lastEditedTime: string;
 };
 
 export default async function AllQuestions() {
@@ -22,6 +23,7 @@ export default async function AllQuestions() {
           question: properties.Question.rich_text[0].text.content,
           company: properties.Company.select?.name,
           subject: properties.Subject.select?.name,
+          lastEditedTime: properties["Last edited time"].last_edited_time,
           id,
         };
       })

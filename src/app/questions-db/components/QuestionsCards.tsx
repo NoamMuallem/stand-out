@@ -20,25 +20,36 @@ export const QuestionsCards = ({
 }) => {
   const [subjectFilter, setSubjectFilter] = useState<string>("");
   const [companyFilter, setCompanyFilter] = useState<string>("");
+  const [dateFilter, setDateFilter] = useState<FixedDates | "">("");
 
   const filteredQuestions = useMemo(
     () =>
       questions.filter((question) => {
         let filter = true;
-        if (subjectFilter.trim() !== "" && question.subject !== subjectFilter) {
+        if (subjectFilter !== "" && question.subject !== subjectFilter) {
           filter = false;
         }
-        if (companyFilter.trim() !== "" && question.company !== companyFilter) {
+        if (companyFilter !== "" && question.company !== companyFilter) {
+          filter = false;
+        }
+        if (
+          dateFilter !== "" &&
+          new Date(question.lastEditedTime).getTime() < fixedDated[dateFilter]
+        ) {
           filter = false;
         }
         return filter;
       }),
-    [questions, subjectFilter, companyFilter],
+    [questions, subjectFilter, companyFilter, dateFilter],
   );
 
   return (
     <>
       <div className="flex w-full items-center justify-start gap-2 px-4">
+        <DateSelect
+          dateFilter={dateFilter}
+          setDateFilter={(value) => setDateFilter(value)}
+        />
         <SubjectSelect
           questions={questions}
           subjectFilter={subjectFilter}
@@ -170,9 +181,9 @@ const CompanySelect = ({
         <SelectValue placeholder="חברה" />
       </SelectTrigger>
       <SelectContent>
-        {allCompanies.map((subject) => (
-          <SelectItem key={subject} value={subject}>
-            {subject}
+        {allCompanies.map((company) => (
+          <SelectItem key={company} value={company}>
+            {company}
           </SelectItem>
         ))}
         <SelectSeparator />
@@ -191,4 +202,61 @@ const CompanySelect = ({
       </SelectContent>
     </Select>
   ) : null;
+};
+
+type FixedDates = "השבוע" | "שבוע שעבר" | "חודש שעבר" | "השנה";
+
+const currentDate = new Date();
+const fixedDated: Record<FixedDates, number> = {
+  השבוע: new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000).getTime(),
+  "שבוע שעבר": new Date(
+    currentDate.getTime() - 14 * 24 * 60 * 60 * 1000,
+  ).getTime(),
+  "חודש שעבר": new Date(
+    currentDate.getTime() - 31 * 24 * 60 * 60 * 1000,
+  ).getTime(),
+  השנה: new Date(currentDate.getTime() - 365 * 24 * 60 * 60 * 1000).getTime(),
+};
+
+const DateSelect = ({
+  dateFilter,
+  setDateFilter,
+}: {
+  dateFilter: string;
+  setDateFilter: (value: FixedDates | "") => void;
+}) => {
+  const [open, setOpen] = useState<boolean>(false);
+
+  return (
+    <Select
+      value={dateFilter}
+      onValueChange={(value) => setDateFilter(value as FixedDates)}
+      open={open}
+      onOpenChange={setOpen}
+    >
+      <SelectTrigger className="w-[120px] flex-row-reverse">
+        <SelectValue placeholder="תאריך" />
+      </SelectTrigger>
+      <SelectContent>
+        {[...Object.keys(fixedDated)].map((date) => (
+          <SelectItem className="flex flex-row-reverse" key={date} value={date}>
+            {date}
+          </SelectItem>
+        ))}
+        <SelectSeparator />
+        <Button
+          className="w-full px-2"
+          variant="destructive"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            setDateFilter("");
+            setOpen(false);
+          }}
+        >
+          מחק
+        </Button>
+      </SelectContent>
+    </Select>
+  );
 };
