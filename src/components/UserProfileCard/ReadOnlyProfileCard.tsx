@@ -18,13 +18,17 @@ export const UserProfileCard = ({
     <div className="w-full space-y-8 p-2">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start justify-start gap-4">
-          <Avatar>
+          <Avatar className="min-h-[52px] min-w-[52px]">
             <AvatarImage src={user?.imageUrl} alt="User Profile" />
             <AvatarFallback />
           </Avatar>
           <div className="flex flex-col items-start justify-start gap-1">
-            <span>{userProfile?.firstName}</span>
-            <span>{userProfile?.background}</span>
+            <span className="text-3xl text-slate-900">
+              {userProfile?.firstName}
+            </span>
+            <span className="text-xs font-bold text-slate-800">
+              {userProfile?.background}
+            </span>
           </div>
         </div>
         {displayEdit ? (

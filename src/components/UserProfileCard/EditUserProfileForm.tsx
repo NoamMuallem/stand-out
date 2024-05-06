@@ -61,7 +61,7 @@ export const EditUserProfileForm = ({
         onSubmit={form.handleSubmit(onSubmit)}
         className="w-full space-y-8 p-2"
       >
-        <Avatar>
+        <Avatar className="min-h-[52px] min-w-[52px]">
           <AvatarImage src={user?.imageUrl} alt="User Profile" />
           <AvatarFallback />
         </Avatar>
