@@ -17,5 +17,5 @@ export default async function NavBar() {
     }
   } catch (e) {}
 
-  return <NavBarClient />;
+  return <NavBarClient userProfile={userProfile} />;
 }

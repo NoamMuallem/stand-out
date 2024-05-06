@@ -18,6 +18,7 @@ import {
   SheetTrigger,
 } from "~/components/ui/sheet";
 import { cn } from "~/lib/utils";
+import { type UserProfile } from "~/types/trpcTypes";
 import { Profile } from "./Profile";
 
 const BRAND_NAME = "סטנדאוט";
@@ -29,7 +30,7 @@ const links: Array<{ label: string; href: string }> = [
   { label: "בלוג", href: "/blog" },
 ] as const;
 
-export function NavBar() {
+export function NavBar({ userProfile }: { userProfile: UserProfile }) {
   return (
     <div className="z-10 flex min-w-full justify-between border-b p-2">
       <NavigationMenu className="flex flex-1 items-center justify-between px-4">
@@ -45,7 +46,7 @@ export function NavBar() {
             <HeaderLink href={href} label={label} key={href} />
           ))}
         </NavigationMenuList>
-        <ControlPanelWithDrawer />
+        <ControlPanelWithDrawer userProfile={userProfile} />
       </NavigationMenu>
     </div>
   );
@@ -65,10 +66,10 @@ const DrawerLink = ({ href, label }: { href: string; label: string }) => (
   </DialogClose>
 );
 
-const AuthButton = () => {
+const AuthButton = ({ userProfile }: { userProfile: UserProfile }) => {
   const { userId } = useAuth();
   return userId ? (
-    <Profile />
+    <Profile userProfile={userProfile} />
   ) : (
     <Link
       className={buttonVariants({ size: "icon", variant: "outline" })}
@@ -79,10 +80,14 @@ const AuthButton = () => {
   );
 };
 
-const ControlPanelWithDrawer = () => {
+const ControlPanelWithDrawer = ({
+  userProfile,
+}: {
+  userProfile: UserProfile;
+}) => {
   return (
     <div className="flex items-center gap-3">
-      <AuthButton />
+      <AuthButton userProfile={userProfile} />
       <Dialog>
         <SheetTrigger className="transition min-[825px]:hidden">
           <Button asChild variant="outline" size="icon" className="p-[7px]">
