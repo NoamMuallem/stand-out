@@ -1,7 +1,7 @@
 import { SignOutButton, useUser } from "@clerk/nextjs";
 import { LogOut, MessageSquareText, User } from "lucide-react";
 import Link from "next/link";
-import { ProfileCard } from "~/components/UserProfileCard";
+import { ProfileCard } from "~/components/UserProfileCard/UserProfileCard";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Dialog, DialogTrigger } from "~/components/ui/dialog";
 import {
