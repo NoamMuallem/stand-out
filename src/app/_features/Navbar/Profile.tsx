@@ -14,29 +14,29 @@ export function Profile() {
   const { user } = useUser();
 
   return (
-    <DropdownMenu>
+    <DropdownMenu dir="rtl">
       <DropdownMenuTrigger
         asChild
         className="h-[2.25rem] w-[2.25rem] cursor-pointer"
       >
         <Avatar>
           <AvatarImage src={user?.imageUrl} alt="User Profile" />
-          <AvatarFallback></AvatarFallback>
+          <AvatarFallback />
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
+      <DropdownMenuContent className="w-min">
         <DropdownMenuGroup>
           <Link href="/user-profile">
-            <DropdownMenuItem>
+            <DropdownMenuItem className="flex items-center justify-start gap-2">
               <User className="mr-2 h-4 w-4" />
-              <span>Account</span>
+              <span>חשבון</span>
             </DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>
         <SignOutButton>
-          <DropdownMenuItem>
+          <DropdownMenuItem className="flex items-center justify-start gap-2">
             <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
+            <span>התנתק</span>
           </DropdownMenuItem>
         </SignOutButton>
       </DropdownMenuContent>

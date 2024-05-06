@@ -84,8 +84,10 @@ export const userProfile = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userFromRequest = ctx.session.userId;
       const { userID } = input;
-      if (!(userID !== userFromRequest)) {
-        throw new Error("לא ניתן ליצור פרופיל למשתמש אחר");
+      if (userID !== userFromRequest) {
+        throw new Error(
+          ` ${userID + " " + userFromRequest} לא ניתן ליצור פרופיל למשתמש אחר`,
+        );
       }
 
       const clerkUser = await clerkClient.users.getUser(userID);
