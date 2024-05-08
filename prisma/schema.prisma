@@ -26,7 +26,7 @@ model TimeSlot {
   isTaken    Boolean
   user       UserProfile @relation(fields: [userID], references: [userID])
   userID     String
-  meeting    Meeting?
+  meeting    Meeting?    @relation(references: [meetingID], fields: [meetingID])
   meetingID  Int?
 }
 
@@ -41,14 +41,13 @@ model UserProfile {
 }
 
 model Meeting {
-  meetingID  Int      @id @unique @default(autoincrement())
-  user1ID    String
-  user2ID    String
-  startTime  DateTime
-  endTime    DateTime
-  reviews    Review[]
-  timeSlot   TimeSlot @relation(fields: [timeSlotID], references: [timeSlotID])
-  timeSlotID Int      @unique
+  meetingID Int        @id @unique @default(autoincrement())
+  user1ID   String
+  user2ID   String
+  startTime DateTime
+  endTime   DateTime
+  reviews   Review[]
+  timeSlots TimeSlot[]
 }
 
 model Review {

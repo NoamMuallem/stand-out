@@ -17,11 +17,26 @@ export const timeSlotRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // The user that chose the open time slot
       const user = ctx.session.userId;
+      const { startTime, endTime } = input;
+      // make sure the user does not have another time slot that uses this time
+      const conflictingTimeSlots = await ctx.db.timeSlot.findMany({
+        where: {
+          OR: [
+            { startTime: { lte: startTime }, endTime: { lte: endTime } },
+            { startTime: { gte: startTime }, endTime: { gte: endTime } },
+            { startTime: { lte: startTime }, endTime: { gte: endTime } },
+            { startTime: { gte: startTime }, endTime: { lte: endTime } },
+          ],
+        },
+      });
+
+      if (conflictingTimeSlots.length > 0)
+        throw new Error("חלון הזמן המבוקש תפוס");
 
       return ctx.db.timeSlot.create({
         data: {
-          startTime: input.startTime,
-          endTime: input.endTime,
+          startTime,
+          endTime,
           isTaken: false,
           user: {
             connect: {

@@ -1,4 +1,5 @@
 import { type Review } from ".prisma/client/default.js";
+import { Meeting, type PrismaClient, type TimeSlot } from "@prisma/client";
 import { z } from "zod";
 
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
@@ -18,80 +19,64 @@ export const meetingRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // The user that chose the open time slot
       const user2ID = ctx.session.userId;
-
       const { userToMeetWithID: user1ID, startTime, endTime } = input;
 
-      // Make sure user 1 have a time slot
-      const timeSlot = await ctx.db.timeSlot.findFirst({
-        where: {
-          userID: user1ID,
-          startTime: { gte: startTime },
-          endTime: { lte: endTime },
-          isTaken: false,
-        },
-      });
+      const [user1TimeSlot, user2TimeSlot] = await Promise.all([
+        ctx.db.timeSlot.findFirst({
+          where: {
+            userID: user1ID,
+            startTime: { gte: startTime },
+            endTime: { lte: endTime },
+            isTaken: false,
+          },
+        }),
+        ctx.db.timeSlot.findFirst({
+          where: {
+            userID: user2ID,
+            startTime: { gte: startTime },
+            endTime: { lte: endTime },
+            isTaken: false,
+          },
+        }),
+      ]);
 
-      if (!timeSlot) {
+      if (!user1TimeSlot) {
         throw new Error("לא נמצא חלון זמן פתוח עבור המשתמש המבוקש");
       }
 
-      // break the time slots
-      // start of the time slot -> start of the meeting
-      const timeSlotsUpdatesPromiseArray = [];
-      let meetingTimeSlotIndex = 0;
-      if (timeSlot.startTime < startTime) {
-        meetingTimeSlotIndex = 1;
-        timeSlotsUpdatesPromiseArray.push(
-          ctx.db.timeSlot.create({
-            data: {
-              userID: user1ID,
-              startTime: timeSlot.startTime,
-              endTime: startTime,
-              isTaken: false,
-            },
-          }),
-        );
+      const { meetingTimeSlotID: user1MeetingTimeSlotID } =
+        await breakUserTimeSlotsPromiseFactory({
+          meetingStartTime: startTime,
+          meetingEndTime: endTime,
+          userID: user1ID,
+          db: ctx.db,
+          timeSlot: user1TimeSlot,
+        });
+
+      //if user 2 have a time slot break it and mark not free time slot as well
+      const { meetingTimeSlotID: user2MeetingTimeSlotID } =
+        await breakUserTimeSlotsPromiseFactory({
+          meetingStartTime: startTime,
+          meetingEndTime: endTime,
+          userID: user2ID,
+          db: ctx.db,
+          timeSlot: user2TimeSlot,
+        });
+
+      if (!user1MeetingTimeSlotID)
+        throw new Error("נכשל בעדכון חלונות הזמן של המשתמש");
+
+      const meetingIDsToConnect = [
+        {
+          timeSlotID: user1MeetingTimeSlotID,
+        },
+      ];
+
+      if (user2MeetingTimeSlotID) {
+        meetingIDsToConnect.push({
+          timeSlotID: user2MeetingTimeSlotID,
+        });
       }
-
-      // start of the meeting -> end of the meeting (exactly MEETING_LENGTH minutes)
-      timeSlotsUpdatesPromiseArray.push(
-        ctx.db.timeSlot.create({
-          data: {
-            userID: user1ID,
-            startTime,
-            endTime: new Date(startTime.getTime() + MEETING_LENGTH * 60 * 1000),
-            isTaken: true,
-          },
-        }),
-      );
-
-      // end of the meeting -> end of the time slot
-      if (timeSlot.endTime > endTime) {
-        timeSlotsUpdatesPromiseArray.push(
-          ctx.db.timeSlot.create({
-            data: {
-              userID: user1ID,
-              startTime: endTime,
-              endTime: timeSlot.endTime,
-              isTaken: false,
-            },
-          }),
-        );
-      }
-
-      // delete the original time slot
-      timeSlotsUpdatesPromiseArray.push(
-        ctx.db.timeSlot.delete({
-          where: {
-            timeSlotID: timeSlot.timeSlotID,
-          },
-        }),
-      );
-
-      const timeSlots = await Promise.all(timeSlotsUpdatesPromiseArray);
-
-      // we don't need the last time slot
-      timeSlots.pop();
 
       const newMeeting = await ctx.db.meeting.create({
         data: {
@@ -99,10 +84,8 @@ export const meetingRouter = createTRPCRouter({
           user2ID,
           startTime,
           endTime,
-          timeSlot: {
-            connect: {
-              timeSlotID: timeSlots[meetingTimeSlotIndex]?.timeSlotID,
-            },
+          timeSlots: {
+            connect: meetingIDsToConnect,
           },
           reviews: {
             create: [
@@ -138,6 +121,7 @@ export const meetingRouter = createTRPCRouter({
         },
         include: {
           reviews: true,
+          timeSlots: true,
         },
       });
 
@@ -149,75 +133,45 @@ export const meetingRouter = createTRPCRouter({
       if (meeting.startTime < new Date())
         throw new Error("לא ניתן לבטל פגישה שכבר התחילה");
 
-      if (
-        !("timeSlotID" in meeting) ||
-        !(typeof meeting.timeSlotID === "number")
-      )
+      if ("timeSlots" in meeting && meeting.timeSlots.length === 0)
         throw new Error("לא ניתן למצוא את חלון הזמן של הפגישה");
 
-      const independentDBCalls = [];
-
-      // fined the meeting time slot
-      const timeSlots = await ctx.db.timeSlot.findUnique({
-        where: {
-          timeSlotID: meeting.timeSlotID,
-        },
-      });
-
-      if (!timeSlots) throw new Error("לא ניתן למצוא את חלון הזמן של הפגישה");
-
       // find if it has adjacent time slots to merge with i.e. the meeting ends on a start of a time slot or starts at the end of another one
-      const adjacentTimeSlots = await ctx.db.timeSlot.findMany({
-        where: {
-          userID: meeting.user1ID,
-          isTaken: false,
-          OR: [
-            {
-              endTime: meeting.startTime,
-            },
-            {
-              startTime: meeting.endTime,
-            },
-          ],
-        },
-      });
+      const [user1AdjacentTimeSlots, user2AdjacentTimeSlots] =
+        await Promise.all(
+          [meeting.user1ID, meeting.user2ID].map((userID) =>
+            ctx.db.timeSlot.findMany({
+              where: {
+                userID,
+                isTaken: false,
+                OR: [
+                  {
+                    endTime: meeting.endTime,
+                  },
+                  {
+                    startTime: meeting.startTime,
+                  },
+                ],
+              },
+            }),
+          ),
+        );
 
-      //create an array of time slots sorted by the start time from the earliest to the latest
-      const timeSlotsToMerge = [timeSlots, ...adjacentTimeSlots].sort(
-        (a, b) => a.startTime.getTime() - b.startTime.getTime(),
-      );
-
-      const firstTimeSlot = timeSlotsToMerge[0];
-      const lastTimeSlot = timeSlotsToMerge[timeSlotsToMerge.length - 1];
-
-      if (!firstTimeSlot || !lastTimeSlot)
-        throw new Error("לא ניתן למצוא חלון זמן פתוח עבור המשתמש המבוקש");
-
-      const mergedTimeSlot = {
-        startTime: firstTimeSlot.startTime,
-        endTime: lastTimeSlot.endTime,
-      };
-
-      // remove the time slots
+      const independentDBCalls = [];
       independentDBCalls.push(
-        ...timeSlotsToMerge.map((timeSlot) =>
-          ctx.db.timeSlot.delete({
-            where: {
-              timeSlotID: timeSlot.timeSlotID,
-            },
-          }),
-        ),
+        mergeAdjacentTimeSlots({
+          db: ctx.db,
+          meeting,
+          user: "user1ID",
+          adjacentTimeSlots: user1AdjacentTimeSlots,
+        }),
       );
-
-      //create the new time Slot
       independentDBCalls.push(
-        ctx.db.timeSlot.create({
-          data: {
-            userID: meeting.user1ID,
-            startTime: mergedTimeSlot.startTime,
-            endTime: mergedTimeSlot.endTime,
-            isTaken: false,
-          },
+        mergeAdjacentTimeSlots({
+          db: ctx.db,
+          meeting,
+          user: "user2ID",
+          adjacentTimeSlots: user2AdjacentTimeSlots,
         }),
       );
 
@@ -251,3 +205,147 @@ export const meetingRouter = createTRPCRouter({
       return meeting;
     }),
 });
+
+const breakUserTimeSlotsPromiseFactory = async ({
+  timeSlot,
+  meetingStartTime,
+  meetingEndTime,
+  userID,
+  db,
+}: {
+  timeSlot: TimeSlot | null;
+  meetingStartTime: Date;
+  meetingEndTime: Date;
+  userID: string;
+  db: PrismaClient;
+}) => {
+  if (!timeSlot)
+    return {
+      meetingTimeSlotID: null,
+    };
+  // break the time slots
+  // start of the time slot -> start of the meeting
+  const timeSlotsUpdatesPromiseArray = [];
+  let meetingTimeSlotIndex = 0;
+  if (timeSlot.startTime < meetingStartTime) {
+    meetingTimeSlotIndex = 1;
+    timeSlotsUpdatesPromiseArray.push(
+      db.timeSlot.create({
+        data: {
+          userID,
+          startTime: timeSlot.startTime,
+          endTime: meetingStartTime,
+          isTaken: false,
+        },
+      }),
+    );
+  }
+
+  // start of the meeting -> end of the meeting (exactly MEETING_LENGTH minutes)
+  timeSlotsUpdatesPromiseArray.push(
+    db.timeSlot.create({
+      data: {
+        userID,
+        startTime: meetingStartTime,
+        endTime: new Date(
+          meetingStartTime.getTime() + MEETING_LENGTH * 60 * 1000,
+        ),
+        isTaken: true,
+      },
+    }),
+  );
+
+  // end of the meeting -> end of the time slot
+  if (timeSlot.endTime > meetingEndTime) {
+    timeSlotsUpdatesPromiseArray.push(
+      db.timeSlot.create({
+        data: {
+          userID,
+          startTime: meetingEndTime,
+          endTime: timeSlot.endTime,
+          isTaken: false,
+        },
+      }),
+    );
+  }
+
+  // delete the original time slot
+  timeSlotsUpdatesPromiseArray.push(
+    db.timeSlot.delete({
+      where: {
+        timeSlotID: timeSlot.timeSlotID,
+      },
+    }),
+  );
+  const timeSlots = await Promise.all(timeSlotsUpdatesPromiseArray);
+
+  return {
+    meetingTimeSlotID: timeSlots[meetingTimeSlotIndex]?.timeSlotID,
+  };
+};
+
+const mergeAdjacentTimeSlots = async ({
+  db,
+  meeting,
+  user,
+  adjacentTimeSlots,
+}: {
+  db: PrismaClient;
+  meeting: Meeting & { timeSlots: TimeSlot[] };
+  user: "user1ID" | "user2ID";
+  adjacentTimeSlots: TimeSlot[] | undefined;
+}) => {
+  if (!adjacentTimeSlots || adjacentTimeSlots.length === 0) return [];
+
+  const { timeSlots: allMeetingTimeSlots } = meeting;
+  const userID = meeting[user];
+
+  const userTimeSlot = allMeetingTimeSlots.filter(
+    (timeSlot) => timeSlot.userID === userID,
+  )[0];
+
+  if (!userTimeSlot) return [];
+
+  //create an array of time slots sorted by the start time from the earliest to the latest
+  const timeSlotsToMerge = [userTimeSlot, ...adjacentTimeSlots].sort(
+    (a, b) => a.startTime.getTime() - b.startTime.getTime(),
+  );
+
+  const firstTimeSlot = timeSlotsToMerge[0];
+  const lastTimeSlot = timeSlotsToMerge[timeSlotsToMerge.length - 1];
+
+  if (!firstTimeSlot || !lastTimeSlot)
+    throw new Error("לא ניתן למצוא חלון זמן פתוח עבור המשתמש המבוקש");
+
+  const mergedTimeSlot = {
+    startTime: firstTimeSlot.startTime,
+    endTime: lastTimeSlot.endTime,
+  };
+
+  const promiseArray = [];
+
+  // remove the time slots
+  promiseArray.push(
+    ...timeSlotsToMerge.map((timeSlot) =>
+      db.timeSlot.delete({
+        where: {
+          timeSlotID: timeSlot.timeSlotID,
+        },
+      }),
+    ),
+  );
+
+  //create the new time Slot
+  promiseArray.push(
+    db.timeSlot.create({
+      data: {
+        userID,
+        startTime: mergedTimeSlot.startTime,
+        endTime: mergedTimeSlot.endTime,
+        isTaken: false,
+      },
+    }),
+  );
+
+  return promiseArray;
+};
