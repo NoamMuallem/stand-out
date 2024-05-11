@@ -1,102 +1,267 @@
-"use-client";
-import { useState, type FormEvent } from "react";
-import { type DateValue } from "react-aria";
+"use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { getErrorMessage } from "~/app/_utils/getErrorMessage";
-import { DateTimePicker } from "../DateAndTimePicker/DateAndTimePicker";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
 import { Button } from "../ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { submitForm } from "./TimeSloteFormAction";
+
+const minutesOption = ["00", "30"];
+const hoursOption = [
+  "06",
+  "07",
+  "08",
+  "09",
+  "10",
+  "11",
+  "12",
+  "13",
+  "14",
+  "15",
+  "16",
+  "17",
+  "18",
+  "19",
+  "20",
+  "21",
+  "22",
+  "23",
+  "00",
+  "01",
+  "02",
+  "03",
+  "04",
+  "05",
+];
+
+export const formSchema = z
+  .object({
+    date: z.string(),
+    startHour: z.string(),
+    startMinutes: z.string(),
+    endHour: z.string(),
+    endMinutes: z.string(),
+  })
+  .refine((data) => Number(data.endHour) > Number(data.startHour), {
+    message: "שעת סיום חייבת להיות אחרי שעת התחלה",
+    path: ["endHour"], // Pointing out which field is invalid
+  });
 
 export const TimeSlotForm = () => {
   const [serverError, setServerError] = useState<string | null>();
-  const [firstTimeSlot, setFirstTimeSlot] = useState<DateValue>();
-  const [secondTimeSlot, setSecondTimeSlot] = useState<DateValue>();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      date: new Date().toISOString().split("T")[0],
+      startHour: "06",
+      startMinutes: "00",
+      endHour: "08",
+      endMinutes: "30",
+    },
+  });
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setServerError(null);
-      if (!firstTimeSlot || !secondTimeSlot)
-        throw new Error("לא נבחרו שני נקודות זמן");
-      const firstDate = new Date(
-        firstTimeSlot.year,
-        firstTimeSlot.month - 1,
-        firstTimeSlot.day,
-        firstTimeSlot.hour,
-        firstTimeSlot.minute,
+      const startTime = new Date(
+        new Date(
+          new Date(values.date).setHours(Number(values.startHour)),
+        ).setMinutes(Number(values.startMinutes)),
       );
-      const secondDate = new Date(
-        secondTimeSlot.year,
-        secondTimeSlot.month - 1,
-        secondTimeSlot.day,
-        secondTimeSlot.hour,
-        secondTimeSlot.minute,
+      const endTime = new Date(
+        new Date(
+          new Date(values.date).setHours(Number(values.endHour)),
+        ).setMinutes(Number(values.endMinutes)),
       );
-      await submitForm(firstDate, secondDate);
-      setFirstTimeSlot(undefined);
-      setSecondTimeSlot(undefined);
+      await submitForm(startTime, endTime);
+      form.reset();
     } catch (error) {
-      setServerError(getErrorMessage(error));
+      const errorMessage = getErrorMessage(error);
+      console.error(errorMessage);
+      setServerError(errorMessage);
     }
-  };
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="w-full space-y-8 p-2">
-      <label>
-        מתחיל:
-        <DateTimePicker
-          isDateUnavailable={(value) => {
-            const date = new Date(
-              value.year,
-              value.month - 1,
-              value.day,
-              value.hour,
-              value.minute,
-            );
-            return date < new Date();
-          }}
-          value={firstTimeSlot}
-          onChange={(value) => setFirstTimeSlot(value)}
-          granularity={"minute"}
-          shouldCloseOnSelect
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex w-full flex-col items-center justify-start gap-1"
+      >
+        <FormField
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem className="w-full">
+              <FormLabel>תאריך:</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  type="date"
+                  className="w-full"
+                  min={new Date().toISOString().split("T")[0]}
+                  onChange={(e) =>
+                    field.onChange(
+                      new Date(e.target.value).toISOString().split("T")[0],
+                    )
+                  }
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </label>
-      <label>
-        נגמר:
-        <DateTimePicker
-          value={secondTimeSlot}
-          onChange={(value) => setSecondTimeSlot(value)}
-          isDateUnavailable={(value) => {
-            const selectedTime = new Date(
-              value.year,
-              value.month - 1,
-              value.day,
-              value.hour,
-              value.minute,
-            );
-            let dateToCompareTo;
-            if (firstTimeSlot) {
-              dateToCompareTo = new Date(
-                firstTimeSlot.year,
-                firstTimeSlot.month - 1,
-                firstTimeSlot.day,
-                firstTimeSlot.hour,
-                firstTimeSlot.minute,
-              );
-            } else {
-              dateToCompareTo = new Date();
-            }
-            return selectedTime < dateToCompareTo;
-          }}
-          granularity={"minute"}
-          shouldCloseOnSelect
-        />
-      </label>
-      {serverError && (
-        <div className="text-sm font-bold text-red-500">{serverError}</div>
-      )}
-      <div className="flex items-center justify-start gap-4">
-        <Button type="submit">שלח</Button>
-      </div>
-    </form>
+        <div className="flex w-full flex-row flex-wrap items-center justify-between">
+          <div className="flex flex-1 flex-col items-start justify-start">
+            <span>שעה התחלה</span>
+            <div className="flex flex-row items-start justify-start gap-1">
+              <FormField
+                control={form.control}
+                name="startMinutes"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel>דקות:</FormLabel>
+                    <FormControl>
+                      <Select
+                        {...field}
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="w-[80px]">
+                          <SelectValue placeholder="דקות" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {minutesOption.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="startHour"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel>שעה:</FormLabel>
+                    <FormControl>
+                      <Select
+                        {...field}
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="w-[80px]">
+                          <SelectValue placeholder="שעה" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {hoursOption.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col items-start justify-start">
+            <span>שעת סיום</span>
+            <div className="flex w-full flex-row items-start justify-start gap-1">
+              <FormField
+                control={form.control}
+                name="endMinutes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>דקות:</FormLabel>
+                    <FormControl>
+                      <Select
+                        {...field}
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="w-[80px]">
+                          <SelectValue placeholder="דקות" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {minutesOption.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="endHour"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>שעה:</FormLabel>
+                    <FormControl>
+                      <Select
+                        {...field}
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="w-[80px]">
+                          <SelectValue placeholder="שעה" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {hoursOption.map((option) => (
+                            <SelectItem
+                              disabled={
+                                Number(form.getValues().startHour) >=
+                                Number(option)
+                              }
+                              key={option}
+                              value={option}
+                            >
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        </div>
+        {serverError && <FormMessage>{serverError}</FormMessage>}
+        <Button>שמור</Button>
+      </form>
+    </Form>
   );
 };
