@@ -2,7 +2,7 @@ import "@total-typescript/ts-reset";
 import { meetingRouter } from "~/server/api/routers/meeting";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { reviewRouter } from "./routers/review";
-import { timeSlotRouter } from "./routers/timeSlote";
+import { timeSlot } from "./routers/timeSlote";
 import { userProfile } from "./routers/userProfile";
 
 /**
@@ -14,7 +14,7 @@ export const appRouter = createTRPCRouter({
   meeting: meetingRouter,
   review: reviewRouter,
   userProfile: userProfile,
-  timeSlotRouter: timeSlotRouter,
+  timeSlotRouter: timeSlot,
 });
 
 // export type definition of API

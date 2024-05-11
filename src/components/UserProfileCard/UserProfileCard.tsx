@@ -4,13 +4,15 @@ import { type UserProfile } from "~/types/trpcTypes";
 import { DialogContent } from "../ui/dialog";
 import { EditUserProfileForm } from "./EditUserProfileForm";
 import { UserProfileCard } from "./ReadOnlyProfileCard";
+import { TimeSlotForm } from "./TimeSlotForm";
 
 export const ProfileCard = ({ userProfile }: { userProfile: UserProfile }) => {
   const { user } = useUser();
-  const canEdit = Boolean(
-    userProfile?.userID && user?.id && userProfile.userID === user.id,
-  );
+  const validUserID =
+    userProfile?.userID && user?.id && userProfile.userID === user.id;
   const [isEditMode, setEditMode] = useState<boolean>(false);
+
+  if (!validUserID) return null;
 
   return (
     <DialogContent className="flex w-full flex-col items-start justify-start">
@@ -21,11 +23,12 @@ export const ProfileCard = ({ userProfile }: { userProfile: UserProfile }) => {
         />
       ) : (
         <UserProfileCard
-          displayEdit={canEdit && !isEditMode}
+          displayEdit={Boolean(validUserID) && !isEditMode}
           userProfile={userProfile}
           setEditMode={() => setEditMode(true)}
         />
       )}
+      <TimeSlotForm />
     </DialogContent>
   );
 };

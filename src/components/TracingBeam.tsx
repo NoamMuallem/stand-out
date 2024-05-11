@@ -2,7 +2,7 @@
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import { cn } from "~/app/_utils/cn";
-import { useBreakpoint } from "~/app/hooks/tailwind";
+import { useBreakpoint } from "~/hooks/tailwind";
 
 type TracingBeamWrapperProps = {
   children: React.ReactNode;
