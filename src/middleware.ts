@@ -10,6 +10,7 @@ export default authMiddleware({
 
 //TODO: understand what this thing does and if I need it
 // this is why I did it: https://stackoverflow.com/questions/77108110/clerk-authmiddleware-is-not-being-used-even-though-it-is-in-my-middleware-ts-f
+// ticker: https://www.notion.so/understand-and-configure-the-clerk-middleware-in-a-way-that-will-sill-allow-direct-navigation-to-a-s-359a1d77b93c431ea751e98dec21b540
 // export const config = {
 //   matcher: ["/", "/(api|trpc)(.*)"],
 // };
