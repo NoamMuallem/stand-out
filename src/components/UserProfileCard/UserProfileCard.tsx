@@ -30,7 +30,7 @@ export const ProfileCard = ({ userProfile }: { userProfile: UserProfile }) => {
         />
       )}
       <TimeSlotForm />
-      <WeekView />
+      <WeekView userID={userProfile.userID} />
     </DialogContent>
   );
 };

@@ -2,6 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { Dialog, DialogClose } from "@radix-ui/react-dialog";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LogIn, Menu, Rocket } from "lucide-react";
 import Link from "next/link";
 import { Button, buttonVariants } from "~/components/ui/button";
@@ -21,6 +22,8 @@ import { cn } from "~/lib/utils";
 import { type UserProfile } from "~/types/trpcTypes";
 import { Profile } from "./Profile";
 
+const queryClient = new QueryClient();
+
 const BRAND_NAME = "סטנדאוט";
 const DRAWER_DESCRIPTION = "Plan, Build & Scale.";
 
@@ -32,23 +35,25 @@ const links: Array<{ label: string; href: string }> = [
 
 export function NavBar({ userProfile }: { userProfile: UserProfile }) {
   return (
-    <div className="z-10 flex min-w-full justify-between border-b p-2">
-      <NavigationMenu className="flex flex-1 items-center justify-between px-4">
-        <Link
-          href="/"
-          className="text-md flex cursor-pointer items-center justify-center gap-2 pl-2 font-bold"
-        >
-          <Rocket />
-          {BRAND_NAME}
-        </Link>
-        <NavigationMenuList className="max-[825px]:hidden ">
-          {links.map(({ label, href }) => (
-            <HeaderLink href={href} label={label} key={href} />
-          ))}
-        </NavigationMenuList>
-        <ControlPanelWithDrawer userProfile={userProfile} />
-      </NavigationMenu>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <div className="z-10 flex min-w-full justify-between border-b p-2">
+        <NavigationMenu className="flex flex-1 items-center justify-between px-4">
+          <Link
+            href="/"
+            className="text-md flex cursor-pointer items-center justify-center gap-2 pl-2 font-bold"
+          >
+            <Rocket />
+            {BRAND_NAME}
+          </Link>
+          <NavigationMenuList className="max-[825px]:hidden ">
+            {links.map(({ label, href }) => (
+              <HeaderLink href={href} label={label} key={href} />
+            ))}
+          </NavigationMenuList>
+          <ControlPanelWithDrawer userProfile={userProfile} />
+        </NavigationMenu>
+      </div>
+    </QueryClientProvider>
   );
 }
 
