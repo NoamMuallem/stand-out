@@ -1,6 +1,7 @@
 import { useUser } from "@clerk/nextjs";
 import { useState } from "react";
 import { type UserProfile } from "~/types/trpcTypes";
+import WeekView from "../Weekview/WeekView";
 import { DialogContent } from "../ui/dialog";
 import { EditUserProfileForm } from "./EditUserProfileForm";
 import { UserProfileCard } from "./ReadOnlyProfileCard";
@@ -29,6 +30,7 @@ export const ProfileCard = ({ userProfile }: { userProfile: UserProfile }) => {
         />
       )}
       <TimeSlotForm />
+      <WeekView />
     </DialogContent>
   );
 };
