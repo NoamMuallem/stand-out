@@ -159,7 +159,13 @@ const Calendar = ({ userID }: { userID: string }) => {
       {isLoading && <LoaderIcon className="mx-auto animate-spin" />}
       {error && <div>{error.message}</div>}
       {!isLoading && !error && data ? (
-        <div className="text-center">{JSON.stringify(data)}</div>
+        <div className="text-center">
+          {data.map((timeSlot) => (
+            <div
+              key={timeSlot.timeSlotID}
+            >{`${timeSlot.startTime.toISOString().split("T")[0]}: ${format(timeSlot.startTime, "HH:MM")}-${format(timeSlot.endTime, "HH:MM")}`}</div>
+          ))}
+        </div>
       ) : null}
       {renderFooter()}
     </div>
