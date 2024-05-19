@@ -1,5 +1,8 @@
 "use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
+import { startOfWeek } from "date-fns";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -65,6 +68,7 @@ export const formSchema = z
   });
 
 export const TimeSlotForm = () => {
+  const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -92,6 +96,9 @@ export const TimeSlotForm = () => {
       );
       await submitForm(startTime, endTime);
       form.reset();
+      await queryClient.invalidateQueries({
+        queryKey: ["timeSlot", startOfWeek(values.date)],
+      });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error(errorMessage);

@@ -12,7 +12,6 @@ import {
 } from "date-fns";
 import { LoaderIcon } from "lucide-react";
 import { useState } from "react";
-import { useDebounceState } from "~/hooks/useDebounce";
 import { fetchTimeSlots } from "./serverActions";
 
 const getWeekDates = (date: Date) => {
@@ -23,13 +22,12 @@ const getWeekDates = (date: Date) => {
 
 const Calendar = ({ userID }: { userID: string }) => {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
-  const [debounceCurrentDate, currentDate, setCurrentDate] =
-    useDebounceState<Date>(new Date(), 500);
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["timeSlot", currentDate],
     queryFn: async () => {
-      const { startDate, endDate } = getWeekDates(debounceCurrentDate);
+      const { startDate, endDate } = getWeekDates(currentDate);
       return await fetchTimeSlots({
         startTime: startDate,
         endTime: endDate,
