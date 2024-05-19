@@ -11,7 +11,7 @@ import {
   subWeeks,
 } from "date-fns";
 import { LoaderIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchTimeSlots } from "./serverActions";
 
 const getWeekDates = (date: Date) => {
@@ -35,6 +35,10 @@ const Calendar = ({ userID }: { userID: string }) => {
       });
     },
   });
+
+  useEffect(() => {
+    console.log({ data });
+  }, [data]);
 
   const prevMonth = () => {
     setCurrentDate(subMonths(currentDate, 1));
@@ -161,7 +165,7 @@ const Calendar = ({ userID }: { userID: string }) => {
           {data.map((timeSlot) => (
             <div
               key={timeSlot.timeSlotID}
-            >{`${timeSlot.startTime.toISOString().split("T")[0]}: ${format(timeSlot.startTime, "HH:MM")}-${format(timeSlot.endTime, "HH:MM")}`}</div>
+            >{`${timeSlot.startTime.toISOString().split("T")[0]}: ${format(timeSlot.startTime, "HH:mm")}-${format(timeSlot.endTime, "HH:mm")}`}</div>
           ))}
         </div>
       ) : null}

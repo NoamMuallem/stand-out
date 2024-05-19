@@ -94,6 +94,7 @@ export const TimeSlotForm = () => {
           new Date(values.date).setHours(Number(values.endHour)),
         ).setMinutes(Number(values.endMinutes)),
       );
+      console.log({ startTime, endTime });
       await submitForm(startTime, endTime);
       form.reset();
       await queryClient.invalidateQueries({
