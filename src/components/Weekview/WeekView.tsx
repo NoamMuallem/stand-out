@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
+import { Tooltip } from "../ui/tooltip";
 import { TimeSlotButton } from "./TimeSlot";
 import { fetchTimeSlots } from "./serverActions";
 
@@ -77,24 +78,32 @@ const Calendar = ({ userID }: { userID: string }) => {
     const dateFormat = "MMM yyyy";
     return (
       <div className="flex w-full items-center justify-evenly">
-        <Button size="icon" variant="outline" onClick={prevMonth}>
-          <ChevronsRight />
-        </Button>
-        <Button size="icon" variant="outline" onClick={prevWeek}>
-          <ChevronRight />
-        </Button>
+        <Tooltip content="לחודש הקודם">
+          <Button size="icon" variant="outline" onClick={prevMonth}>
+            <ChevronsRight />
+          </Button>
+        </Tooltip>
+        <Tooltip content="לשבוע הקודם">
+          <Button size="icon" variant="outline" onClick={prevWeek}>
+            <ChevronRight />
+          </Button>
+        </Tooltip>
         <div className="justify-baseline flex max-w-full flex-col text-center">
           <span>{format(currentMonth, dateFormat)}</span>
           <Button size="sm" onClick={today}>
             <span>היום</span>
           </Button>
         </div>
-        <Button size="icon" variant="outline" onClick={nextWeek}>
-          <ChevronLeft />
-        </Button>
-        <Button size="icon" variant="outline" onClick={nextMonth}>
-          <ChevronsLeft />
-        </Button>
+        <Tooltip content="לשבוע הבא">
+          <Button size="icon" variant="outline" onClick={nextWeek}>
+            <ChevronLeft />
+          </Button>
+        </Tooltip>
+        <Tooltip content="לחודש הבא">
+          <Button size="icon" variant="outline" onClick={nextMonth}>
+            <ChevronsLeft />
+          </Button>
+        </Tooltip>
       </div>
     );
   };
