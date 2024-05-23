@@ -10,8 +10,16 @@ import {
   subMonths,
   subWeeks,
 } from "date-fns";
-import { LoaderIcon } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  LoaderIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
+import { Button } from "../ui/button";
+import { TimeSlotButton } from "./TimeSlot";
 import { fetchTimeSlots } from "./serverActions";
 
 const getWeekDates = (date: Date) => {
@@ -60,19 +68,33 @@ const Calendar = ({ userID }: { userID: string }) => {
     setCurrentDate(addWeeks(currentDate, 1));
   };
 
+  const today = () => {
+    setCurrentMonth(new Date());
+    setCurrentDate(new Date());
+  };
+
   const renderHeader = () => {
     const dateFormat = "MMM yyyy";
     return (
-      <div className="flex w-full py-5">
-        <div className="max-w-full flex-1 basis-0 justify-start text-left">
-          <div onClick={prevMonth}>prev month</div>
-        </div>
-        <div className="max-w-full flex-1 basis-0 justify-center text-center">
+      <div className="flex w-full items-center justify-evenly">
+        <Button size="icon" variant="outline" onClick={prevMonth}>
+          <ChevronsRight />
+        </Button>
+        <Button size="icon" variant="outline" onClick={prevWeek}>
+          <ChevronRight />
+        </Button>
+        <div className="justify-baseline flex max-w-full flex-col text-center">
           <span>{format(currentMonth, dateFormat)}</span>
+          <Button size="sm" onClick={today}>
+            <span>היום</span>
+          </Button>
         </div>
-        <div className="max-w-full flex-1 basis-0 justify-end text-right">
-          <div onClick={nextMonth}>next month</div>
-        </div>
+        <Button size="icon" variant="outline" onClick={nextWeek}>
+          <ChevronLeft />
+        </Button>
+        <Button size="icon" variant="outline" onClick={nextMonth}>
+          <ChevronsLeft />
+        </Button>
       </div>
     );
   };
@@ -91,7 +113,7 @@ const Calendar = ({ userID }: { userID: string }) => {
       );
     }
     return (
-      <div className="m-0 flex w-full flex-row flex-wrap p-0 py-1 font-normal uppercase text-slate-500/50">
+      <div className="m-0 mr-[50px] flex flex-wrap p-0 py-1 font-normal uppercase text-slate-500/50">
         {days}
       </div>
     );
@@ -108,7 +130,6 @@ const Calendar = ({ userID }: { userID: string }) => {
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
         formattedDate = format(day, dateFormat);
-        // const cloneDay = day;
         days.push(
           <div
             className="flex max-w-full flex-1 basis-0 justify-center"
@@ -122,7 +143,7 @@ const Calendar = ({ userID }: { userID: string }) => {
 
       rows.push(
         <div
-          className="m-0 flex w-full flex-row flex-wrap p-0"
+          className="m-0 mr-[50px] flex flex-wrap p-0"
           key={day.toISOString()}
         >
           {days}
@@ -130,46 +151,45 @@ const Calendar = ({ userID }: { userID: string }) => {
       );
       days = [];
     }
-    return <div className="w-full">{rows}</div>;
-  };
-  const renderFooter = () => {
-    return (
-      <div className="flex-middle m-0 flex w-full cursor-pointer select-none flex-row flex-wrap py-5">
-        <div
-          onClick={prevWeek}
-          className="max-w-full flex-1 basis-0 justify-start text-left"
-        >
-          <span>prev week</span>
-        </div>
-        <div className="max-w-full flex-1 basis-0 justify-center text-center">
-          <span></span>
-        </div>
-        <div
-          className="max-w-full flex-1 basis-0 cursor-pointer select-none justify-end text-right"
-          onClick={nextWeek}
-        >
-          <span>next week</span>
-        </div>
-      </div>
-    );
+    return <div className="">{rows}</div>;
   };
   return (
-    <div className="block w-full">
+    <div className="block">
       {renderHeader()}
       {renderDays()}
       {renderCells()}
       {isLoading && <LoaderIcon className="mx-auto animate-spin" />}
       {error && <div>{error.message}</div>}
-      {!isLoading && !error && data ? (
-        <div className="text-center">
-          {data.map((timeSlot) => (
-            <div
-              key={timeSlot.timeSlotID}
-            >{`${timeSlot.startTime.toISOString().split("T")[0]}: ${format(timeSlot.startTime, "HH:mm")}-${format(timeSlot.endTime, "HH:mm")}`}</div>
-          ))}
+      <div className="flex max-h-[50vh] flex-col overflow-auto scrollbar-hide">
+        <div className="flex flex-col gap-1.5 pt-3">
+          {data &&
+            Array.from(Array(48).keys()).map((timeValue) => {
+              const hour = Math.floor(timeValue / 2);
+              const minutes = timeValue % 2 === 0 ? 0 : 30;
+              return (
+                <div className="relative flex flex-col" key={timeValue}>
+                  <div className="pointer-events-none absolute -top-[15px] flex w-full">
+                    <div>{`${hour}:${minutes === 0 ? "00" : "30"}`}</div>
+                    <div className="pointer-events-none my-auto h-[1px] w-full bg-slate-400"></div>
+                  </div>
+                  <div className="m-0 mr-[50px] flex flex-row flex-wrap gap-2 p-0">
+                    {Array.from(Array(7).keys()).map((dayValue) => (
+                      <TimeSlotButton
+                        key={timeValue + dayValue}
+                        dayValue={dayValue}
+                        timeValue={timeValue}
+                        currentDate={currentDate}
+                        hour={hour}
+                        minutes={minutes}
+                        data={data}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
         </div>
-      ) : null}
-      {renderFooter()}
+      </div>
     </div>
   );
 };
