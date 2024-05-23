@@ -10,6 +10,7 @@ import {
   subMonths,
   subWeeks,
 } from "date-fns";
+import { he } from "date-fns/locale";
 import {
   ChevronLeft,
   ChevronRight,
@@ -89,7 +90,7 @@ const Calendar = ({ userID }: { userID: string }) => {
           </Button>
         </Tooltip>
         <div className="justify-baseline flex max-w-full flex-col text-center">
-          <span>{format(currentMonth, dateFormat)}</span>
+          <span>{format(currentMonth, dateFormat, { locale: he })}</span>
           <Button size="sm" onClick={today}>
             <span>היום</span>
           </Button>
@@ -117,7 +118,7 @@ const Calendar = ({ userID }: { userID: string }) => {
           className="max-w-full flex-1 basis-0 justify-center text-center"
           key={i}
         >
-          {format(addDays(startDate, i), dateFormat)}
+          {format(addDays(startDate, i), dateFormat, { locale: he })}
         </div>,
       );
     }
@@ -138,7 +139,7 @@ const Calendar = ({ userID }: { userID: string }) => {
     let formattedDate = "";
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
-        formattedDate = format(day, dateFormat);
+        formattedDate = format(day, dateFormat, { locale: he });
         days.push(
           <div
             className="flex max-w-full flex-1 basis-0 justify-center"
