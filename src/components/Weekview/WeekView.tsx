@@ -164,7 +164,7 @@ const Calendar = ({ userID }: { userID: string }) => {
     return <div className="">{rows}</div>;
   };
   return (
-    <div className="block">
+    <div className="block w-full">
       {renderHeader()}
       {renderDays()}
       {renderCells()}

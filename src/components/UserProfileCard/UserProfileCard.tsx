@@ -2,8 +2,8 @@ import { useUser } from "@clerk/nextjs";
 import { useState } from "react";
 import { type UserProfile } from "~/types/trpcTypes";
 import WeekView from "../Weekview/WeekView";
-import { Button } from "../ui/button";
 import { DialogContent } from "../ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { EditUserProfileForm } from "./EditUserProfileForm";
 import { UserProfileCard } from "./ReadOnlyProfileCard";
 import { TimeSlotForm } from "./TimeSlotForm";
@@ -14,14 +14,19 @@ export const ProfileCard = ({ userProfile }: { userProfile: UserProfile }) => {
     userProfile?.userID && user?.id && userProfile.userID === user.id;
   const [isEditMode, setEditMode] = useState<boolean>(false);
 
-  const [showMeeting, setShowMeeting] = useState(false);
-
   if (!validUserID) return null;
 
   return (
-    <DialogContent className="flex w-full flex-col items-start justify-start">
-      {!showMeeting ? (
-        <div className="w-full">
+    <DialogContent className="flex w-full flex-col items-center justify-start">
+      <Tabs
+        defaultValue="profile"
+        className="flex w-full flex-col items-stretch justify-center"
+      >
+        <TabsList className="w-fit self-center">
+          <TabsTrigger value="profile">פרופיל</TabsTrigger>
+          <TabsTrigger value="schedule">לוח זמנים</TabsTrigger>
+        </TabsList>
+        <TabsContent className="w-full p-0" value="profile" dir="rtl">
           {isEditMode ? (
             <EditUserProfileForm
               userProfile={userProfile}
@@ -34,17 +39,12 @@ export const ProfileCard = ({ userProfile }: { userProfile: UserProfile }) => {
               setEditMode={() => setEditMode(true)}
             />
           )}
-          <Button type="button" onClick={() => setShowMeeting(true)}>
-            פגישות ולוח זמנים
-          </Button>
-        </div>
-      ) : (
-        <div className="flex w-full flex-col gap-4">
+        </TabsContent>
+        <TabsContent value="schedule" dir="rtl">
           <TimeSlotForm />
           <WeekView userID={userProfile.userID} />
-          <Button onClick={() => setShowMeeting(false)}>חזור</Button>
-        </div>
-      )}
+        </TabsContent>
+      </Tabs>
     </DialogContent>
   );
 };
