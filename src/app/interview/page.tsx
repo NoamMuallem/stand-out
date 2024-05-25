@@ -38,7 +38,7 @@ export default function InterviewersPage() {
         {data && data.length > 0 ? (
           data.map((user) => <UserRow key={user.userID} user={user} />)
         ) : (
-          <div>לא נמצאו משתמשים עם חלונות זמן פנויים בשמן המבוקש</div>
+          <div>לא נמצאו משתמשים עם חלונות זמן פנויים בזמן המבוקש</div>
         )}
       </div>
     </div>
