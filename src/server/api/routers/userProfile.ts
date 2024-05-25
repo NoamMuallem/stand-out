@@ -105,7 +105,7 @@ export const userProfile = createTRPCRouter({
       });
     }),
 
-  getAllUsersWithTimeSlotsInRange: publicProcedure
+  getAllUsersWithTimeSlotsInRange: privateProcedure
     .input(
       z.object({
         startTime: z.date(),
@@ -115,16 +115,27 @@ export const userProfile = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const { startTime, endTime } = input;
+      const {
+        session: { userId: userID },
+      } = ctx;
       return ctx.db.userProfile.findMany({
         where: {
-          timeSlots: {
-            some: {
-              startTime: {
-                gte: startTime,
-                lte: endTime,
+          AND: [
+            {
+              timeSlots: {
+                some: {
+                  startTime: {
+                    gte: startTime,
+                    lte: endTime,
+                  },
+                  isTaken: false,
+                },
+              },
+              userID: {
+                not: userID,
               },
             },
-          },
+          ],
         },
         orderBy: {
           averageRanking: "desc",
