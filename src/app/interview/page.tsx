@@ -21,7 +21,7 @@ export default function InterviewersPage() {
   });
 
   return (
-    <div className="flex w-full flex-col gap-4 px-5">
+    <main className="flex min-h-screen w-full flex-col items-stretch justify-start gap-8 px-3 py-5 text-2xl text-black">
       <div className="flex w-full items-center justify-start">
         <DatePicker
           date={startTime}
@@ -41,7 +41,7 @@ export default function InterviewersPage() {
           <div>לא נמצאו משתמשים עם חלונות זמן פנויים בזמן המבוקש</div>
         )}
       </div>
-    </div>
+    </main>
   );
 }
 
