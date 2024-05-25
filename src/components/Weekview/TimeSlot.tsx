@@ -5,14 +5,12 @@ import { Button } from "../ui/button";
 
 const TimeSlotButtonContent = ({
   dayValue,
-  timeValue,
   currentDate,
   hour,
   minutes,
   data,
 }: {
   dayValue: number;
-  timeValue: number;
   currentDate: Date;
   hour: number;
   minutes: number;
