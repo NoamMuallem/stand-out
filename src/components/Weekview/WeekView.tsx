@@ -1,6 +1,9 @@
+import { useAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   addDays,
+  addHours,
+  addMinutes,
   addMonths,
   addWeeks,
   endOfWeek,
@@ -18,7 +21,7 @@ import {
   ChevronsRight,
   LoaderIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "../ui/button";
 import { Tooltip } from "../ui/tooltip";
 import { TimeSlotButton } from "./TimeSlot";
@@ -33,6 +36,10 @@ const getWeekDates = (date: Date) => {
 const Calendar = ({ userID }: { userID: string }) => {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const { userId: currentUserID } = useAuth();
+  const [hoverTimeSlot, setHoverTimeSlot] = useState<
+    { timeValue: number; dayValue: number } | undefined
+  >();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["timeSlot", currentDate],
@@ -45,10 +52,6 @@ const Calendar = ({ userID }: { userID: string }) => {
       });
     },
   });
-
-  useEffect(() => {
-    console.log({ data });
-  }, [data]);
 
   const prevMonth = () => {
     setCurrentDate(subMonths(currentDate, 1));
@@ -108,6 +111,7 @@ const Calendar = ({ userID }: { userID: string }) => {
       </div>
     );
   };
+
   const renderDays = () => {
     const dateFormat = "EEE";
     const days = [];
@@ -163,6 +167,7 @@ const Calendar = ({ userID }: { userID: string }) => {
     }
     return <div className="">{rows}</div>;
   };
+
   return (
     <div className="block w-full">
       {renderHeader()}
@@ -191,6 +196,45 @@ const Calendar = ({ userID }: { userID: string }) => {
                         hour={hour}
                         minutes={minutes}
                         data={data}
+                        onMouseIn={() =>
+                          setHoverTimeSlot({ timeValue, dayValue })
+                        }
+                        onMouseOut={() => setHoverTimeSlot(undefined)}
+                        groupHover={Boolean(
+                          hoverTimeSlot &&
+                            dayValue === hoverTimeSlot.dayValue &&
+                            timeValue <= hoverTimeSlot.timeValue + 2 &&
+                            timeValue >= hoverTimeSlot.timeValue,
+                        )}
+                        onClick={() => {
+                          const startDate = startOfWeek(currentDate, {
+                            weekStartsOn: 0,
+                          });
+                          const startDateWithDay = addDays(startDate, dayValue);
+                          const startDateWithHour = addHours(
+                            startDateWithDay,
+                            hour,
+                          );
+                          const startDateWithMinutes = addMinutes(
+                            startDateWithHour,
+                            minutes,
+                          );
+                          const endDateWithDay = addHours(
+                            startDateWithMinutes,
+                            1,
+                          );
+                          const endDateWithMinutes = addMinutes(
+                            endDateWithDay,
+                            30,
+                          );
+
+                          console.log({
+                            startDateWithMinutes,
+                            endDateWithMinutes,
+                            userID,
+                            CurrentUserID: currentUserID,
+                          });
+                        }}
                       />
                     ))}
                   </div>

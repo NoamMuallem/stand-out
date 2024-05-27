@@ -9,12 +9,20 @@ const TimeSlotButtonContent = ({
   hour,
   minutes,
   data,
+  onClick,
+  onMouseIn,
+  onMouseOut,
+  groupHover,
 }: {
+  onClick: () => void;
   dayValue: number;
   currentDate: Date;
   hour: number;
   minutes: number;
   data: TimeSlot[];
+  onMouseIn: () => void;
+  onMouseOut: () => void;
+  groupHover: boolean;
 }) => {
   const selected = useMemo(() => {
     const startDate = startOfWeek(currentDate, {
@@ -33,10 +41,21 @@ const TimeSlotButtonContent = ({
 
   return (
     <Button
-      variant={selected ? "default" : "outline"}
-      className="h-9 flex-1 basis-0"
+      variant={
+        !groupHover
+          ? selected
+            ? "default"
+            : "outline"
+          : selected
+            ? "accent"
+            : "destructive"
+      }
+      className={`h-9 flex-1 basis-0`}
+      onClick={onClick}
+      onMouseEnter={onMouseIn}
+      onMouseLeave={onMouseOut}
     >
-      {}
+      {selected?.isTaken ? "meeting" : ""}
     </Button>
   );
 };
