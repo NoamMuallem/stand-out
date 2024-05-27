@@ -6,6 +6,8 @@ import { LoaderIcon } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { DatePicker } from "~/components/DatePicker";
+import WeekView from "~/components/Weekview/WeekView";
+import { Dialog, DialogContent, DialogTrigger } from "~/components/ui/dialog";
 import {
   fetchClerkUserImage,
   getAllUsersWithFreeTimeSlotsInRange,
@@ -35,10 +37,11 @@ export default function InterviewersPage() {
       <div className="flex flex-col gap-1">
         {isLoading && <LoaderIcon className="mx-auto animate-spin" />}
         {error && <div>{error.message}</div>}
-        {data && data.length > 0 ? (
-          data.map((user) => <UserRow key={user.userID} user={user} />)
-        ) : (
-          <div>לא נמצאו משתמשים עם חלונות זמן פנויים בזמן המבוקש</div>
+        {data && data.length > 0
+          ? data.map((user) => <UserRow key={user.userID} user={user} />)
+          : null}
+        {!isLoading && !error && (!data || data.length === 0) && (
+          <div>קרתה שגיאה בקבלת המידע המבוקש</div>
         )}
       </div>
     </main>
@@ -52,10 +55,19 @@ const UserRow = ({ user }: { user: UserProfile }) => {
   });
 
   return (
-    <div className="flex w-full items-center justify-start gap-4 rounded border border-slate-600 px-5 py-3">
-      {data && <Image width="40" height="40" src={data} alt={user.firstName} />}
-      <div>{user.firstName}</div>
-      <div>{user.averageRanking}</div>
-    </div>
+    <Dialog>
+      <DialogTrigger>
+        <div className="flex w-full cursor-pointer items-center justify-start gap-4 rounded border border-slate-600 px-5 py-3">
+          {data && (
+            <Image width="40" height="40" src={data} alt={user.firstName} />
+          )}
+          <div>{user.firstName}</div>
+          <div>{user.averageRanking}</div>
+        </div>
+      </DialogTrigger>
+      <DialogContent className="flex w-full flex-col items-center justify-start">
+        <WeekView userID={user.userID} />
+      </DialogContent>
+    </Dialog>
   );
 };
