@@ -187,7 +187,6 @@ const Calendar = ({ userID }: { userID: string }) => {
                       <TimeSlotButton
                         key={timeValue + dayValue}
                         dayValue={dayValue}
-                        timeValue={timeValue}
                         currentDate={currentDate}
                         hour={hour}
                         minutes={minutes}
