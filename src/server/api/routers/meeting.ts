@@ -1,5 +1,5 @@
 import { type Review } from ".prisma/client/default.js";
-import { Meeting, type PrismaClient, type TimeSlot } from "@prisma/client";
+import { type Meeting, type PrismaClient, type TimeSlot } from "@prisma/client";
 import { z } from "zod";
 
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
