@@ -1,5 +1,5 @@
 import { useAuth } from "@clerk/clerk-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addDays,
   addHours,
@@ -25,7 +25,7 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 import { Tooltip } from "../ui/tooltip";
 import { TimeSlotButton } from "./TimeSlot";
-import { fetchTimeSlots } from "./serverActions";
+import { createMeeting, fetchTimeSlots } from "./serverActions";
 
 const getWeekDates = (date: Date) => {
   const startDate = startOfWeek(date, { weekStartsOn: 0 }); // Assuming week starts on Sunday
@@ -40,6 +40,7 @@ const Calendar = ({ userID }: { userID: string }) => {
   const [hoverTimeSlot, setHoverTimeSlot] = useState<
     { timeValue: number; dayValue: number } | undefined
   >();
+  const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["timeSlot", currentDate],
@@ -206,7 +207,7 @@ const Calendar = ({ userID }: { userID: string }) => {
                             timeValue <= hoverTimeSlot.timeValue + 2 &&
                             timeValue >= hoverTimeSlot.timeValue,
                         )}
-                        onClick={() => {
+                        onClick={async () => {
                           const startDate = startOfWeek(currentDate, {
                             weekStartsOn: 0,
                           });
@@ -215,25 +216,25 @@ const Calendar = ({ userID }: { userID: string }) => {
                             startDateWithDay,
                             hour,
                           );
-                          const startDateWithMinutes = addMinutes(
+                          const startTime = addMinutes(
                             startDateWithHour,
                             minutes,
                           );
-                          const endDateWithDay = addHours(
-                            startDateWithMinutes,
-                            1,
-                          );
-                          const endDateWithMinutes = addMinutes(
-                            endDateWithDay,
-                            30,
-                          );
+                          const endDateWithDay = addHours(startTime, 1);
+                          const endTime = addMinutes(endDateWithDay, 30);
 
-                          console.log({
-                            startDateWithMinutes,
-                            endDateWithMinutes,
-                            userID,
-                            CurrentUserID: currentUserID,
-                          });
+                          try {
+                            await createMeeting({
+                              startTime,
+                              endTime,
+                              userToMeetWithID: userID,
+                            });
+                            await queryClient.invalidateQueries({
+                              queryKey: ["timeSlot", startOfWeek(startTime)],
+                            });
+                          } catch (error) {
+                            alert(error);
+                          }
                         }}
                       />
                     ))}

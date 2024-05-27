@@ -55,7 +55,7 @@ const TimeSlotButtonContent = ({
       onMouseEnter={onMouseIn}
       onMouseLeave={onMouseOut}
     >
-      {selected?.isTaken ? "meeting" : ""}
+      {selected?.isTaken ? "M" : ""}
     </Button>
   );
 };
