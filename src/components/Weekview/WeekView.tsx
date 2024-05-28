@@ -1,24 +1,18 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { startOfWeek } from "date-fns";
+import { useAuth } from "@clerk/clerk-react";
 import { LoaderIcon } from "lucide-react";
 import { useState } from "react";
-import { getErrorMessage } from "~/app/_utils/getErrorMessage";
 import { Controls } from "./Controls";
 import { DayInMonthNumber } from "./DayInMonthNumber";
 import { DaysSymbol } from "./DaysSymbol";
-import { TimeSlotButton } from "./TimeSlot";
+import { DifferentUsersTimeSlotButton } from "./differentUsersTimeslotButton";
 import { useTimeSlots } from "./hooks";
-import { createMeeting } from "./serverActions";
-import {
-  convertSelectedValuesToDate,
-  getMeetingEndTimeByStartTime,
-} from "./utils";
 
 const Calendar = ({ userID }: { userID: string }) => {
   const [hoverTimeSlot, setHoverTimeSlot] = useState<
     { timeValue: number; dayValue: number } | undefined
   >();
   const [serverError, setServerError] = useState<string>();
+  const { userId: sessionUserID } = useAuth();
   const {
     nextMonth,
     nextWeek,
@@ -33,7 +27,10 @@ const Calendar = ({ userID }: { userID: string }) => {
   } = useTimeSlots({
     userID,
   });
-  const queryClient = useQueryClient();
+
+  const differentUser = sessionUserID
+    ? userID.localeCompare(sessionUserID)
+    : false;
 
   return (
     <div className="block w-full">
@@ -65,51 +62,35 @@ const Calendar = ({ userID }: { userID: string }) => {
                     <div className="pointer-events-none my-auto h-[1px] w-full bg-slate-400"></div>
                   </div>
                   <div className="m-0 mr-[50px] flex flex-row flex-wrap gap-2 p-0">
-                    {Array.from(Array(7).keys()).map((dayValue) => (
-                      <TimeSlotButton
-                        key={timeValue + dayValue}
-                        dayValue={dayValue}
-                        currentDate={currentDate}
-                        hour={hour}
-                        minutes={minutes}
-                        data={data}
-                        onMouseIn={() =>
-                          setHoverTimeSlot({ timeValue, dayValue })
-                        }
-                        onMouseOut={() => setHoverTimeSlot(undefined)}
-                        groupHover={Boolean(
-                          hoverTimeSlot &&
-                            dayValue === hoverTimeSlot.dayValue &&
-                            timeValue <= hoverTimeSlot.timeValue + 2 &&
-                            timeValue >= hoverTimeSlot.timeValue,
-                        )}
-                        onClick={async () => {
-                          const startTime = convertSelectedValuesToDate({
-                            currentDate,
-                            dayValue,
-                            hour,
-                            minutes,
-                          });
+                    {Array.from(Array(7).keys()).map((dayValue) => {
+                      // This logic is reusable across all kinds of timeSlotsButton, but we need to memorize it
+                      const groupHover = Boolean(
+                        hoverTimeSlot &&
+                          dayValue === hoverTimeSlot.dayValue &&
+                          timeValue <= hoverTimeSlot.timeValue + 2 &&
+                          timeValue >= hoverTimeSlot.timeValue,
+                      );
+                      const onMouseIn = () =>
+                        setHoverTimeSlot({ timeValue, dayValue });
+                      const onMouseOut = () => setHoverTimeSlot(undefined);
 
-                          const endTime = getMeetingEndTimeByStartTime({
-                            startTime,
-                          });
-                          try {
-                            setServerError(undefined);
-                            await createMeeting({
-                              startTime,
-                              endTime,
-                              userToMeetWithID: userID,
-                            });
-                            await queryClient.invalidateQueries({
-                              queryKey: ["timeSlot", startOfWeek(startTime)],
-                            });
-                          } catch (error) {
-                            setServerError(getErrorMessage(error));
-                          }
-                        }}
-                      />
-                    ))}
+                      // TODO: use "differentUser" to determine the type of timeSlotButton and its actions
+                      return (
+                        <DifferentUsersTimeSlotButton
+                          key={timeValue + dayValue}
+                          groupHover={groupHover}
+                          dayValue={dayValue}
+                          timeValue={timeValue}
+                          currentDate={currentDate}
+                          setMeetingWithUserID={userID}
+                          onMouseIn={onMouseIn}
+                          onMouseOut={onMouseOut}
+                          data={data}
+                          setServerError={setServerError}
+                          setHoverTimeSlot={setHoverTimeSlot}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               );
