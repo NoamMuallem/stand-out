@@ -146,10 +146,10 @@ export const meetingRouter = createTRPCRouter({
                 isTaken: false,
                 OR: [
                   {
-                    endTime: meeting.endTime,
+                    endTime: meeting.startTime,
                   },
                   {
-                    startTime: meeting.startTime,
+                    startTime: meeting.endTime,
                   },
                 ],
               },
