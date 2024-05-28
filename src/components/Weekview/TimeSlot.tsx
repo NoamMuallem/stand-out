@@ -46,7 +46,7 @@ const TimeSlotButtonContent = ({
           ? selected
             ? "default"
             : "outline"
-          : selected
+          : selected && selected.isTaken === false
             ? "accent"
             : "destructive"
       }
