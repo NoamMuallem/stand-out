@@ -25,16 +25,16 @@ export const meetingRouter = createTRPCRouter({
         ctx.db.timeSlot.findFirst({
           where: {
             userID: user1ID,
-            startTime: { gte: startTime },
-            endTime: { lte: endTime },
+            startTime: { lte: startTime },
+            endTime: { gte: endTime },
             isTaken: false,
           },
         }),
         ctx.db.timeSlot.findFirst({
           where: {
             userID: user2ID,
-            startTime: { gte: startTime },
-            endTime: { lte: endTime },
+            startTime: { lte: startTime },
+            endTime: { gte: endTime },
             isTaken: false,
           },
         }),
