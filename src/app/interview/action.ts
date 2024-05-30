@@ -17,6 +17,5 @@ export const getAllUsersWithFreeTimeSlotsInRange = async ({
 
 export const fetchClerkUserImage = async ({ userID }: { userID: string }) => {
   const clerkRes = await clerkClient.users.getUser(userID);
-  console.log({ clerkRes: clerkRes });
   return clerkRes.imageUrl;
 };

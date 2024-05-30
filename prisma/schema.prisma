@@ -10,15 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([name])
-}
-
 model TimeSlot {
   timeSlotID Int         @id @unique @default(autoincrement())
   startTime  DateTime
@@ -41,13 +32,14 @@ model UserProfile {
 }
 
 model Meeting {
-  meetingID Int        @id @unique @default(autoincrement())
-  user1ID   String
-  user2ID   String
-  startTime DateTime
-  endTime   DateTime
-  reviews   Review[]
-  timeSlots TimeSlot[]
+  meetingID       Int        @id @unique @default(autoincrement())
+  user1ID         String
+  user2ID         String
+  startTime       DateTime
+  endTime         DateTime
+  reviews         Review[]
+  timeSlots       TimeSlot[]
+  calendarEventID String?
 }
 
 model Review {

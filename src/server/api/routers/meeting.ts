@@ -2,7 +2,10 @@ import { type Review } from ".prisma/client/default.js";
 import { type Meeting, type PrismaClient, type TimeSlot } from "@prisma/client";
 import { z } from "zod";
 
+import { clerkClient } from "@clerk/nextjs/server";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
+import { getClerkUserToken } from "../utils/getClerkOauthToken";
+import { createEvent, getUserCalendar } from "../utils/googleCalandat";
 
 const MEETING_LENGTH = 90;
 
@@ -78,12 +81,21 @@ export const meetingRouter = createTRPCRouter({
         });
       }
 
+      const calendarEventID = await createCalendarEvent({
+        startTime,
+        endTime,
+        user1ID,
+        user2ID,
+        db: ctx.db,
+      });
+
       const newMeeting = await ctx.db.meeting.create({
         data: {
           user1ID,
           user2ID,
           startTime,
           endTime,
+          calendarEventID,
           timeSlots: {
             connect: meetingIDsToConnect,
           },
@@ -205,6 +217,61 @@ export const meetingRouter = createTRPCRouter({
       return meeting;
     }),
 });
+
+const createCalendarEvent = async ({
+  startTime,
+  endTime,
+  user1ID,
+  user2ID,
+  db,
+}: {
+  startTime: Date;
+  endTime: Date;
+  user1ID: string;
+  user2ID: string;
+  db: PrismaClient;
+}) => {
+  const user2Token = await getClerkUserToken({ userID: user2ID });
+
+  const [user1Profile, user2Profile] = await Promise.all(
+    [user1ID, user2ID].map(
+      async (userID) => await db.userProfile.findUnique({ where: { userID } }),
+    ),
+  );
+
+  const user2Calendar = getUserCalendar({ userOAuthToken: user2Token });
+
+  const event = {
+    summary: `Standout meeting ${user1Profile?.firstName} ${user2Profile?.firstName}`,
+    description: "description",
+    start: {
+      dateTime: startTime.toISOString(),
+    },
+    end: {
+      dateTime: endTime.toISOString(),
+    },
+    attendees: [],
+    reminders: {
+      useDefault: false,
+      overrides: [
+        { method: "email", minutes: 24 * 60 },
+        { method: "popup", minutes: 10 },
+      ],
+    },
+  };
+
+  await Promise.all(
+    [user1ID, user2ID].map((userID) => clerkClient.users.getUser(userID)),
+  ).then((users) =>
+    users.forEach((user) =>
+      // @ts-expect-error: There is a limit to the TS bullshit I can take
+      event.attendees.push({ email: user.emailAddresses[0]?.emailAddress }),
+    ),
+  );
+
+  const { data } = await createEvent({ event, calendar: user2Calendar });
+  return data.id;
+};
 
 const breakUserTimeSlotsPromiseFactory = async ({
   timeSlot,
