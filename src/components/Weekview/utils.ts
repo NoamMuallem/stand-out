@@ -25,7 +25,6 @@ export const getMeetingEndTimeByStartTime = ({
 }: {
   startTime: Date;
 }) => {
-  const endDateWithDay = addHours(startTime, 1);
-  const endTime = addMinutes(endDateWithDay, 30);
+  const endTime = addHours(startTime, 1);
   return endTime;
 };

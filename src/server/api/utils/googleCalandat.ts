@@ -1,4 +1,4 @@
-import { calendar_v3, google } from "googleapis";
+import { google, type calendar_v3 } from "googleapis";
 
 export const getUserCalendar = ({
   userOAuthToken,

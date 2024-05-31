@@ -67,7 +67,7 @@ const Calendar = ({ userID }: { userID: string }) => {
                       const groupHover = Boolean(
                         hoverTimeSlot &&
                           dayValue === hoverTimeSlot.dayValue &&
-                          timeValue <= hoverTimeSlot.timeValue + 2 &&
+                          timeValue <= hoverTimeSlot.timeValue + 1 &&
                           timeValue >= hoverTimeSlot.timeValue,
                       );
                       const onMouseIn = () =>

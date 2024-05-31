@@ -7,7 +7,7 @@ import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { getClerkUserToken } from "../utils/getClerkOauthToken";
 import { createEvent, getUserCalendar } from "../utils/googleCalandat";
 
-const MEETING_LENGTH = 90;
+const MEETING_LENGTH = 60;
 
 export const meetingRouter = createTRPCRouter({
   createMeeting: privateProcedure
@@ -257,6 +257,15 @@ const createCalendarEvent = async ({
         { method: "email", minutes: 24 * 60 },
         { method: "popup", minutes: 10 },
       ],
+    },
+    conferenceDataVersion: 1,
+    conferenceData: {
+      createRequest: {
+        conferenceSolutionKey: {
+          type: "hangoutsMeet",
+        },
+        requestId: user1ID + user2ID + startTime.getTime() + endTime.getTime(),
+      },
     },
   };
 
